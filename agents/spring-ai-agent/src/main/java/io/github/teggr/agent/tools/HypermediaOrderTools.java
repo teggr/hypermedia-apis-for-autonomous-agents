@@ -1,10 +1,12 @@
 package io.github.teggr.agent.tools;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import io.github.teggr.agent.metrics.AgentMetricsCollector;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 
 /**
  * Tools for the <em>hypermedia</em> API strategy.
@@ -34,9 +36,11 @@ import org.springframework.web.client.RestClient;
 public class HypermediaOrderTools {
 
     private final RestClient client;
+    private final AgentMetricsCollector metricsCollector;
 
-    public HypermediaOrderTools(RestClient client) {
+    public HypermediaOrderTools(RestClient client, AgentMetricsCollector metricsCollector) {
         this.client = client;
+        this.metricsCollector = metricsCollector;
     }
 
     @Tool(description = """
@@ -47,11 +51,11 @@ public class HypermediaOrderTools {
     public JsonNode createOrder(
             @ToolParam(description = "Customer identifier") String customerId,
             @ToolParam(description = "Description of the order") String description) {
-        return client.post()
-                .uri("/orders")
-                .body(new CreateOrderRequest(customerId, description))
-                .retrieve()
-                .body(JsonNode.class);
+        return executeWithMetrics(() -> client.post()
+            .uri("/orders")
+            .body(new CreateOrderRequest(customerId, description))
+            .retrieve()
+            .body(JsonNode.class));
     }
 
     @Tool(description = """
@@ -65,9 +69,26 @@ public class HypermediaOrderTools {
             @ToolParam(description = "The href value from a _links entry") String href,
             @ToolParam(description = "HTTP method: GET or POST") String method) {
         if ("POST".equalsIgnoreCase(method)) {
-            return client.post().uri(href).retrieve().body(JsonNode.class);
+            return executeWithMetrics(() -> client.post().uri(href).retrieve().body(JsonNode.class));
         }
-        return client.get().uri(href).retrieve().body(JsonNode.class);
+        return executeWithMetrics(() -> client.get().uri(href).retrieve().body(JsonNode.class));
+    }
+
+    private JsonNode executeWithMetrics(ApiCall call) {
+        metricsCollector.recordApiCall();
+        try {
+            return call.execute();
+        } catch (RestClientResponseException ex) {
+            if (ex.getStatusCode().is4xxClientError()) {
+                metricsCollector.recordInvalidAttempt();
+            }
+            throw ex;
+        }
+    }
+
+    @FunctionalInterface
+    private interface ApiCall {
+        JsonNode execute();
     }
 
     private record CreateOrderRequest(String customerId, String description) {}

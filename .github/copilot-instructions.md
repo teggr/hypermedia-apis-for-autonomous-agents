@@ -4,7 +4,21 @@
 
 This repository is an experimental investigation into whether **hypermedia-driven APIs** (HATEOAS / REST Level 3) provide meaningful benefits for autonomous AI agents over the more conventional **MCP (Model Context Protocol) or static skill/tool-based** approaches.
 
-The investigation is grounded in a conversation summarised in [`conversations/hateoas-for-agent-systems.md`](../conversations/hateoas-for-agent-systems.md).
+The investigation is grounded in two conversation artifacts:
+
+- Full source discussion: [`conversations/chat-gpt-conversation.md`](../conversations/chat-gpt-conversation.md)
+- Distilled summary: [`conversations/hateoas-for-agent-systems.md`](../conversations/hateoas-for-agent-systems.md)
+
+When making repo changes (code, docs, tests, plans), prioritize consistency with these conversations.
+
+## Conversation Fidelity Rules
+
+1. Treat `conversations/chat-gpt-conversation.md` as the canonical source for intent and hypotheses.
+2. Keep `conversations/hateoas-for-agent-systems.md` aligned with the source conversation; update it when new nuance is discovered.
+3. Prefer work that strengthens the explicit comparison between:
+  - conventional static-contract integrations (OpenAPI + MCP/tools)
+  - hypermedia-driven navigation (HAL/HAL-FORMS affordances)
+4. Do not reframe this repository as generic API experimentation. Keep scope centered on agent discoverability, state-aware affordances, adaptability to change, and measurable comparison outcomes.
 
 ## First Principles
 
@@ -33,13 +47,20 @@ Evaluation should cover:
 - **Robustness**: Does the agent attempt invalid operations or hallucinate endpoints?
 - **Developer experience**: How much wiring is needed to integrate a new agent?
 
+Also favor scenario designs from the source conversation:
+- zero-documentation task execution
+- API evolution resilience
+- unknown capability discovery
+- multi-step workflow navigation
+- generic client operation without domain-specific wrappers
+
 ## Technology Stack
 
 All reference services and tests use:
 
 - **Spring Boot** — service foundation
 - **Spring HATEOAS** — hypermedia response building (HAL / HAL-FORMS)
-- **Spring AI** — AI agent orchestration and tool/function calling
+- **Copilot Chat / Copilot CLI** — execution client for prompt-driven scenarios
 
 When writing service code, follow idiomatic Spring Boot conventions: `@RestController`, `@Service`, `@Repository`, constructor injection, and standard Spring application packaging.
 
@@ -48,10 +69,10 @@ When using Spring HATEOAS:
 - Build links using `WebMvcLinkBuilder.linkTo` / `methodOn`
 - Use HAL as the default media type; consider HAL-FORMS for action affordances
 
-When using Spring AI:
-- Use the `ChatClient` / `AgentExecutor` abstractions
-- Register tools via `@Tool` or the `FunctionCallback` API
-- Write agents that operate against both the hypermedia and the conventional API variants to enable comparison
+When executing scenarios:
+- Use the same prompt text against both API variants
+- Capture evidence from service-side actuator endpoints (`http.server.requests`, `httpexchanges`)
+- Keep execution settings consistent between modes for fair comparisons
 
 ## Repository Structure (target)
 
@@ -60,8 +81,6 @@ conversations/          # Source conversations that informed the investigation
 reference-services/
   conventional-api/     # Spring Boot REST API exposed via OpenAPI + MCP tools
   hypermedia-api/       # Spring Boot REST API using Spring HATEOAS (HAL/HAL-FORMS)
-agents/
-  spring-ai-agent/      # Spring AI agent that can target either service variant
 test-plans/             # Scenario-based test plans and evaluation criteria
 docs/                   # Findings, design decisions, evaluation results
 ```
@@ -71,7 +90,7 @@ docs/                   # Findings, design decisions, evaluation results
 1. **Reference domain**: choose a simple but realistic workflow domain (e.g. order management, content publishing) with 3–5 state transitions
 2. **Conventional API service**: expose the domain as a plain REST API with an OpenAPI spec and MCP tool definitions
 3. **Hypermedia API service**: expose the same domain using Spring HATEOAS with HAL-FORMS affordances
-4. **Spring AI agent**: implement an agent that can be pointed at either service and tasked with completing workflows
+4. **Execution client workflow**: define Copilot Chat/CLI prompt suites that can target either service and complete workflows
 5. **Test plan**: define scenarios, metrics, and pass/fail criteria for comparing the two approaches
 
 ## Code Style

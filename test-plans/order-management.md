@@ -113,15 +113,13 @@ Leave the hypermedia API unchanged (the assembler emits the link under the same 
 1. Start the target service:
    - Conventional API: `cd reference-services/conventional-api && mvn spring-boot:run`
    - Hypermedia API: `cd reference-services/hypermedia-api && mvn spring-boot:run`
-2. Set your OpenAI API key: `export OPENAI_API_KEY=<your-key>`
-3. Configure the agent mode in `agents/spring-ai-agent/src/main/resources/application.properties`:
-   - `agent.api.mode=conventional` or `agent.api.mode=hypermedia`
-4. Run the agent: `cd agents/spring-ai-agent && mvn spring-boot:run`
+2. Execute prompts using Copilot Chat or Copilot CLI.
+3. Use `test-plans/copilot-prompt-suite.md` for prompt templates and actuator evidence capture.
 
 ### Automated evaluation
 
-> **TODO**: Implement `OrderAgentEvaluationTest` using Spring AI's test support to run each
-> scenario programmatically, capture metrics, and assert pass criteria.
+> **TODO**: Add a scriptable Copilot-run workflow (CLI prompt runner + actuator snapshot export)
+> to execute each scenario and persist comparable evidence automatically.
 
 ---
 

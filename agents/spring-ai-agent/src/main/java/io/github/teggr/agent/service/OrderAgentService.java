@@ -1,6 +1,7 @@
 package io.github.teggr.agent.service;
 
 import io.github.teggr.agent.config.AgentApiProperties;
+import io.github.teggr.agent.metrics.AgentMetricsCollector;
 import io.github.teggr.agent.tools.ConventionalOrderTools;
 import io.github.teggr.agent.tools.HypermediaOrderTools;
 import org.springframework.ai.chat.client.ChatClient;
@@ -21,16 +22,19 @@ public class OrderAgentService {
 
     private final ChatClient chatClient;
     private final AgentApiProperties properties;
+    private final AgentMetricsCollector metricsCollector;
     private final ConventionalOrderTools conventionalTools;
     private final HypermediaOrderTools hypermediaTools;
 
     public OrderAgentService(
             ChatClient.Builder chatClientBuilder,
             AgentApiProperties properties,
+            AgentMetricsCollector metricsCollector,
             ConventionalOrderTools conventionalTools,
             HypermediaOrderTools hypermediaTools) {
         this.chatClient        = chatClientBuilder.build();
         this.properties        = properties;
+        this.metricsCollector  = metricsCollector;
         this.conventionalTools = conventionalTools;
         this.hypermediaTools   = hypermediaTools;
     }
@@ -44,13 +48,21 @@ public class OrderAgentService {
     public String run(String task) {
         String systemPrompt = buildSystemPrompt();
         Object tools = resolveTools();
+        metricsCollector.startRun(properties.mode(), task);
 
-        return chatClient.prompt()
-                .system(systemPrompt)
-                .user(task)
-                .tools(tools)
-                .call()
-                .content();
+        try {
+            String content = chatClient.prompt()
+                    .system(systemPrompt)
+                    .user(task)
+                    .tools(tools)
+                    .call()
+                    .content();
+            metricsCollector.completeRun(content);
+            return content;
+        } catch (RuntimeException ex) {
+            metricsCollector.failRun(ex.getMessage());
+            throw ex;
+        }
     }
 
     private String buildSystemPrompt() {

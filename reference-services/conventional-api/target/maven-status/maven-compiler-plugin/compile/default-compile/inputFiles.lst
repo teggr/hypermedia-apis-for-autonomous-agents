@@ -1,8 +1,0 @@
-/tmp/workspace/teggr/hypermedia-apis-for-autonomous-agents/reference-services/conventional-api/src/main/java/io/github/teggr/conventionalapi/ConventionalApiApplication.java
-/tmp/workspace/teggr/hypermedia-apis-for-autonomous-agents/reference-services/conventional-api/src/main/java/io/github/teggr/conventionalapi/controller/OrderController.java
-/tmp/workspace/teggr/hypermedia-apis-for-autonomous-agents/reference-services/conventional-api/src/main/java/io/github/teggr/conventionalapi/domain/Order.java
-/tmp/workspace/teggr/hypermedia-apis-for-autonomous-agents/reference-services/conventional-api/src/main/java/io/github/teggr/conventionalapi/domain/OrderStatus.java
-/tmp/workspace/teggr/hypermedia-apis-for-autonomous-agents/reference-services/conventional-api/src/main/java/io/github/teggr/conventionalapi/dto/CreateOrderRequest.java
-/tmp/workspace/teggr/hypermedia-apis-for-autonomous-agents/reference-services/conventional-api/src/main/java/io/github/teggr/conventionalapi/dto/OrderResponse.java
-/tmp/workspace/teggr/hypermedia-apis-for-autonomous-agents/reference-services/conventional-api/src/main/java/io/github/teggr/conventionalapi/repository/OrderRepository.java
-/tmp/workspace/teggr/hypermedia-apis-for-autonomous-agents/reference-services/conventional-api/src/main/java/io/github/teggr/conventionalapi/service/OrderService.java
