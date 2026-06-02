@@ -76,7 +76,7 @@ docs/                   # Findings, design decisions, evaluation results
 
 ## Code Style
 
-- Java 21+ with records and sealed types where appropriate
+- Java 17+ with records and sealed types where appropriate (upgrade to Java 21 when runtime permits)
 - Tests use JUnit 5 and Spring Boot Test; use `@SpringBootTest` for integration tests
 - Follow standard Maven project layout unless there is a compelling reason not to
 - Keep each reference service as a self-contained Maven module
