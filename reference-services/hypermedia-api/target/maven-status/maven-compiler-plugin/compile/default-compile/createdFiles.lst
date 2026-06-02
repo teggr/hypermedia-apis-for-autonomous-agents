@@ -1,0 +1,10 @@
+io/github/teggr/hypermediaapi/model/OrderModelAssembler.class
+io/github/teggr/hypermediaapi/controller/OrderController$CreateOrderRequest.class
+io/github/teggr/hypermediaapi/domain/Order.class
+io/github/teggr/hypermediaapi/repository/OrderRepository.class
+io/github/teggr/hypermediaapi/domain/OrderStatus$1.class
+io/github/teggr/hypermediaapi/HypermediaApiApplication.class
+io/github/teggr/hypermediaapi/domain/OrderStatus.class
+io/github/teggr/hypermediaapi/model/OrderModel.class
+io/github/teggr/hypermediaapi/controller/OrderController.class
+io/github/teggr/hypermediaapi/service/OrderService.class
