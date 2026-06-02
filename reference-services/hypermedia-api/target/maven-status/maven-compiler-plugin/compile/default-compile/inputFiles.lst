@@ -1,0 +1,8 @@
+/tmp/workspace/teggr/hypermedia-apis-for-autonomous-agents/reference-services/hypermedia-api/src/main/java/io/github/teggr/hypermediaapi/HypermediaApiApplication.java
+/tmp/workspace/teggr/hypermedia-apis-for-autonomous-agents/reference-services/hypermedia-api/src/main/java/io/github/teggr/hypermediaapi/controller/OrderController.java
+/tmp/workspace/teggr/hypermedia-apis-for-autonomous-agents/reference-services/hypermedia-api/src/main/java/io/github/teggr/hypermediaapi/domain/Order.java
+/tmp/workspace/teggr/hypermedia-apis-for-autonomous-agents/reference-services/hypermedia-api/src/main/java/io/github/teggr/hypermediaapi/domain/OrderStatus.java
+/tmp/workspace/teggr/hypermedia-apis-for-autonomous-agents/reference-services/hypermedia-api/src/main/java/io/github/teggr/hypermediaapi/model/OrderModel.java
+/tmp/workspace/teggr/hypermedia-apis-for-autonomous-agents/reference-services/hypermedia-api/src/main/java/io/github/teggr/hypermediaapi/model/OrderModelAssembler.java
+/tmp/workspace/teggr/hypermedia-apis-for-autonomous-agents/reference-services/hypermedia-api/src/main/java/io/github/teggr/hypermediaapi/repository/OrderRepository.java
+/tmp/workspace/teggr/hypermedia-apis-for-autonomous-agents/reference-services/hypermedia-api/src/main/java/io/github/teggr/hypermediaapi/service/OrderService.java
