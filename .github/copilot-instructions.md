@@ -11,6 +11,19 @@ The investigation is grounded in two conversation artifacts:
 
 When making repo changes (code, docs, tests, plans), prioritize consistency with these conversations.
 
+## Roadmap Governance
+
+Treat `ROADMAP.md` as the operational source of truth for execution progress.
+
+1. Before starting substantial work, confirm the relevant roadmap phase/tasks.
+2. After completing work, update `ROADMAP.md` in the same change set:
+  - mark completed checklist items as done
+  - add/update follow-up tasks when new work is discovered
+  - revise wording when implementation approach changes (for example tooling or execution mode)
+3. When scope or architecture shifts, reflect that shift in roadmap phases and progress notes immediately.
+4. Do not leave stale roadmap entries that reference removed components or superseded workflows.
+5. Keep progress updates concrete and evidence-based (files changed, capabilities added, validations run).
+
 ## Conversation Fidelity Rules
 
 1. Treat `conversations/chat-gpt-conversation.md` as the canonical source for intent and hypotheses.
