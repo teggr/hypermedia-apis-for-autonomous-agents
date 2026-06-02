@@ -60,7 +60,7 @@ This roadmap defines all tasks required to answer the hypotheses from the conver
   - [ ] S5 API change resilience
   - [ ] S6 Multi-order workflow
 - [ ] Persist run artifacts in machine-readable and human-readable forms:
-  - [ ] JSON or CSV raw run metrics
+  - [x] JSON or CSV raw run metrics
   - [ ] Markdown summary table
 - [ ] Add pass/fail assertions tied to scenario criteria from `test-plans/order-management.md`.
 
@@ -171,7 +171,7 @@ This roadmap defines all tasks required to answer the hypotheses from the conver
 - [x] Enabled `http.server.requests` metrics and `httpexchanges` traces in both reference services.
 - [x] Removed legacy `agents/` module and cleaned root Maven reactor.
 - [x] Updated core docs (`README.md`, `test-plans/order-management.md`, `.github/copilot-instructions.md`) to Copilot-driven execution.
-- [ ] Next: persist metrics artifacts to JSON/CSV for repeatable experiment reporting.
+- [x] Added `scripts/actuator-delta.java` (JBang) to capture before/after actuator snapshots and write per-scenario JSON/CSV deltas to `test-plans/manual-results/`.
 - [ ] Next: add deterministic data reset/seed operations between scenarios.
 - [ ] Next: add scriptable Copilot CLI scenario execution and evidence export for S1 and S2.
 
@@ -180,5 +180,5 @@ This roadmap defines all tasks required to answer the hypotheses from the conver
 - [x] Repository simplified to two reference services only.
 - [x] Actuator metrics/tracing enabled for both services.
 - [x] Manual Copilot prompt workflow documented.
-- [ ] Scripted evidence capture automation implemented.
+- [x] Scripted evidence capture automation implemented.
 - [ ] Scenario runs recorded with before/after metric deltas.

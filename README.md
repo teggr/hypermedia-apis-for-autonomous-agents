@@ -77,21 +77,29 @@ scenario prompts against both services.
 
 ### 4) Capture service-side evidence from Actuator
 
-Collect evidence from each service after every scenario run:
+Use the JBang capture script to take before/after snapshots and compute per-scenario deltas.
+
+Conventional mode example:
 
 ```powershell
-Invoke-RestMethod http://localhost:8080/actuator/metrics/http.server.requests
-Invoke-RestMethod http://localhost:8081/actuator/metrics/http.server.requests
-Invoke-RestMethod http://localhost:8080/actuator/httpexchanges
-Invoke-RestMethod http://localhost:8081/actuator/httpexchanges
+jbang scripts/actuator-delta.java start --scenario S1 --mode conventional --base-url http://localhost:8080
+# Run the S1 prompt in Copilot against conventional API
+jbang scripts/actuator-delta.java finish --scenario S1 --mode conventional --base-url http://localhost:8080
 ```
 
-Endpoint-level drill-down examples:
+Hypermedia mode example:
 
 ```powershell
-Invoke-RestMethod "http://localhost:8080/actuator/metrics/http.server.requests?tag=uri:/orders/{id}/confirm"
-Invoke-RestMethod "http://localhost:8081/actuator/metrics/http.server.requests?tag=uri:/orders/{id}/confirm"
+jbang scripts/actuator-delta.java start --scenario S1 --mode hypermedia --base-url http://localhost:8081
+# Run the S1 prompt in Copilot against hypermedia API
+jbang scripts/actuator-delta.java finish --scenario S1 --mode hypermedia --base-url http://localhost:8081
 ```
+
+The script captures:
+
+- `/actuator/metrics/http.server.requests`
+- `/actuator/httpexchanges`
+- Delta summary including request-count delta, new exchange count, 4xx count, status buckets, and operation distribution
 
 ### 5) Store experiment artifacts
 
