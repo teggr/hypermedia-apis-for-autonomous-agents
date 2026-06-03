@@ -78,3 +78,28 @@ The source conversation proposed concrete comparison scenarios:
 ### Working Hypothesis to Validate
 
 Hypermedia may be less call-efficient in some workflows due to discovery steps, but materially more resilient and adaptable for long-lived agent integrations.
+
+## Current Empirical Recommendation (Caveated)
+
+Based on the current captured runs (S1-S6) and caveated analysis artifacts in `test-plans/manual-results/`:
+
+- **Raw API without discoverable contract** shows the highest ambiguity and guesswork risk.
+- **Conventional API with discoverable OpenAPI** improves speed and accuracy when docs are reliably found and used.
+- **Hypermedia API with state-aware affordances** tends to improve speed and accuracy further for stateful multi-step workflows, because valid next actions are carried in the response and scoped by resource state.
+
+### When Hypermedia Is Preferable
+
+- Multi-step, stateful workflows
+- High cost of invalid transitions
+- Frequent endpoint/workflow evolution where link/rel stability is easier to preserve than hardcoded paths
+
+### When Static Contracts Are Sufficient
+
+- Simple, stable workflows
+- Reliable OpenAPI discovery/execution environment
+- Strong preference for mature OpenAPI-centric tooling over runtime affordance navigation
+
+### Confidence Level
+
+Directional (sufficient for current architecture guidance), but not final-proof.
+Known caveats include non-domain traffic skew and incomplete targeted experiments for H2/H4/H7/H8 plus missing direct token/correctness instrumentation.

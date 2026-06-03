@@ -1,0 +1,76 @@
+{
+  "beforeCapturedAt" : "2026-06-03T10:38:11.111637500Z",
+  "afterCapturedAt" : "2026-06-03T10:51:34.360886400Z",
+  "distributionSource" : "metrics-tags",
+  "totals" : {
+    "metricCountBefore" : 1.0,
+    "metricCountAfter" : 37.0,
+    "metricCountDelta" : 36.0,
+    "newExchangeCount" : 0,
+    "invalid4xxCount" : 10
+  },
+  "statusDistribution" : {
+    "2xx" : 27,
+    "3xx" : 1,
+    "4xx" : 10,
+    "5xx" : 0
+  },
+  "operationDistribution" : [ {
+    "method" : "POST",
+    "uri" : "/orders",
+    "count" : 6
+  }, {
+    "method" : "POST",
+    "uri" : "/orders/{id}/cancel",
+    "count" : 2
+  }, {
+    "method" : "POST",
+    "uri" : "/orders/{id}/confirm",
+    "count" : 4
+  }, {
+    "method" : "GET",
+    "uri" : "/orders",
+    "count" : 3
+  }, {
+    "method" : "GET",
+    "uri" : "/actuator/metrics/{requiredMetricName}",
+    "count" : 21
+  }, {
+    "method" : "GET",
+    "uri" : "/actuator",
+    "count" : 1
+  }, {
+    "method" : "GET",
+    "uri" : "/swagger-ui*/*swagger-initializer.js",
+    "count" : 1
+  }, {
+    "method" : "GET",
+    "uri" : "/swagger-ui.html",
+    "count" : 1
+  }, {
+    "method" : "GET",
+    "uri" : "/swagger-ui*/**",
+    "count" : 3
+  }, {
+    "method" : "GET",
+    "uri" : "/actuator/health",
+    "count" : 1
+  }, {
+    "method" : "GET",
+    "uri" : "/api-docs/swagger-config",
+    "count" : 1
+  }, {
+    "method" : "GET",
+    "uri" : "/**",
+    "count" : 10
+  }, {
+    "method" : "GET",
+    "uri" : "/api-docs",
+    "count" : 1
+  } ],
+  "scenario" : "S6",
+  "mode" : "conventional",
+  "baseUrl" : "http://localhost:8080",
+  "beforeFile" : "test-plans/manual-results/S6/conventional/before-20260603-103811.json",
+  "afterFile" : "test-plans/manual-results/S6/conventional/after-20260603-105134.json"
+}

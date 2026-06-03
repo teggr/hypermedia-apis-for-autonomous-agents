@@ -1,0 +1,2 @@
+after_captured_at,scenario,mode,base_url,metric_count_before,metric_count_after,metric_count_delta,new_exchange_count,invalid_4xx_count,status_2xx,status_3xx,status_4xx,status_5xx
+"2026-06-03T10:55:55.754836400Z","S6","hypermedia","http://localhost:8081",1.0,33.0,32.0,0,8,26,0,8,0

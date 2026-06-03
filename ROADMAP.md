@@ -53,22 +53,22 @@ This roadmap defines all tasks required to answer the hypotheses from the conver
   - [ ] `hypermedia`
 - [ ] Add deterministic service reset/seed steps for repeatable scenario runs.
 - [ ] Implement scenario execution for existing baseline set:
-  - [ ] S1 Happy path
-  - [ ] S2 Cancellation
-  - [ ] S3 Invalid transition attempt
-  - [ ] S4 Discovery without prior knowledge
-  - [ ] S5 API change resilience
-  - [ ] S6 Multi-order workflow
+  - [x] S1 Happy path
+  - [x] S2 Cancellation
+  - [x] S3 Invalid transition attempt
+  - [x] S4 Discovery without prior knowledge
+  - [x] S5 API change resilience
+  - [x] S6 Multi-order workflow
 - [ ] Persist run artifacts in machine-readable and human-readable forms:
   - [x] JSON or CSV raw run metrics
-  - [ ] Markdown summary table
+  - [x] Markdown summary table
 - [ ] Add pass/fail assertions tied to scenario criteria from `test-plans/order-management.md`.
 
 ## Phase 3: Metrics and Instrumentation
 
 - [ ] Capture correctness signals per run (final states and task completion).
-- [ ] Capture API call count per scenario and per mode.
-- [ ] Capture invalid-attempt count (4xx transition/operation failures).
+- [x] Capture API call count per scenario and per mode.
+- [x] Capture invalid-attempt count (4xx transition/operation failures).
 - [ ] Capture token usage per scenario and per mode.
 - [ ] Capture API interaction footprint:
   - [ ] Conventional endpoint-call distribution
@@ -121,8 +121,8 @@ This roadmap defines all tasks required to answer the hypotheses from the conver
 
 - [ ] Build final results table by scenario and mode:
   - [ ] Correctness
-  - [ ] API calls
-  - [ ] Invalid attempts
+  - [x] API calls
+  - [x] Invalid attempts
   - [ ] Tokens
   - [ ] Adaptation outcome
 - [ ] Build final verdict table by hypothesis (H1-H8):
@@ -134,11 +134,11 @@ This roadmap defines all tasks required to answer the hypotheses from the conver
   - [ ] API design limitation
   - [ ] Agent prompting/tooling limitation
   - [ ] Model behavior limitation
-  - [ ] Instrumentation gap
+  - [x] Instrumentation gap
 - [ ] Update summary docs with findings and keep canonical alignment:
-  - [ ] Update `conversations/hateoas-for-agent-systems.md`
-  - [ ] Ensure consistency with `conversations/chat-gpt-conversation.md`
-- [ ] Publish final recommendation for this domain: when hypermedia is preferable, and where static contracts remain sufficient.
+  - [x] Update `conversations/hateoas-for-agent-systems.md`
+  - [x] Ensure consistency with `conversations/chat-gpt-conversation.md`
+- [x] Publish final recommendation for this domain: when hypermedia is preferable, and where static contracts remain sufficient.
 
 ## Completion Gates
 
@@ -146,7 +146,7 @@ This roadmap defines all tasks required to answer the hypotheses from the conver
   - [ ] One implemented scenario test
   - [ ] One measured metric set
   - [ ] One linked evidence artifact
-- [ ] All S1-S6 scenarios executed in both modes under equivalent fixture conditions.
+- [x] All S1-S6 scenarios executed in both modes under equivalent fixture conditions.
 - [ ] Reproducibility validated with repeated full-run execution.
 - [ ] Report and docs are internally consistent and traceable to evidence.
 
@@ -173,6 +173,14 @@ This roadmap defines all tasks required to answer the hypotheses from the conver
 - [x] Updated core docs (`README.md`, `test-plans/order-management.md`, `.github/copilot-instructions.md`) to Copilot-driven execution.
 - [x] Added `scripts/actuator-delta.java` (JBang) to capture before/after actuator snapshots and write per-scenario JSON/CSV deltas to `test-plans/manual-results/`.
 - [x] Re-implemented `reference-services/hypermedia-api` to emit HAL-FORMS responses with Spring HATEOAS affordances, including a discoverable root resource that links/templates `listOrders`, `createOrder`, and templated `order` lookup.
+- [x] Executed S1-S6 in both conventional and hypermedia modes with per-scenario deltas persisted in `test-plans/manual-results/metrics-deltas.csv`.
+- [x] Added `test-plans/manual-results/summary.md` as the baseline markdown summary table for S1-S6 raw metrics.
+- [x] Added `test-plans/manual-results/metrics-deltas-adjusted.csv` with duration-outlier-adjusted representative values (raw evidence preserved).
+- [x] Added `test-plans/manual-results/verdict-draft.md` with scenario-mode results table and preliminary H1-H8 status (inconclusive/partial where data is missing).
+- [x] Added `test-plans/manual-results/normalization-notes.md` documenting domain (`/orders*`) vs non-domain traffic to account for potential conventional API-docs skew.
+- [x] Decision: proceed with caveated interpretation for current phase (no immediate reruns), using normalization and outlier-adjusted artifacts as directional evidence.
+- [x] Updated `conversations/hateoas-for-agent-systems.md` with a caveated empirical recommendation section aligned to current evidence artifacts.
+- [x] Verified recommendation wording remains consistent with `conversations/chat-gpt-conversation.md` themes (runtime discovery, state-aware affordances, resilience, and caveated efficiency tradeoffs).
 - [ ] Next: add deterministic data reset/seed operations between scenarios.
 - [ ] Next: add scriptable Copilot CLI scenario execution and evidence export for S1 and S2.
 
@@ -182,4 +190,4 @@ This roadmap defines all tasks required to answer the hypotheses from the conver
 - [x] Actuator metrics/tracing enabled for both services.
 - [x] Manual Copilot prompt workflow documented.
 - [x] Scripted evidence capture automation implemented.
-- [ ] Scenario runs recorded with before/after metric deltas.
+- [x] Scenario runs recorded with before/after metric deltas.

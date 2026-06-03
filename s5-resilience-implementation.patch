@@ -1,0 +1,113 @@
+diff --git a/reference-services/conventional-api/src/main/java/io/github/teggr/conventionalapi/controller/OrderController.java b/reference-services/conventional-api/src/main/java/io/github/teggr/conventionalapi/controller/OrderController.java
+index 4435157..25766ef 100644
+--- a/reference-services/conventional-api/src/main/java/io/github/teggr/conventionalapi/controller/OrderController.java
++++ b/reference-services/conventional-api/src/main/java/io/github/teggr/conventionalapi/controller/OrderController.java
+@@ -67,9 +67,9 @@ public class OrderController {
+         return toResponse(service.findById(id));
+     }
+ 
+-    @Operation(summary = "Confirm a pending order")
+-    @PostMapping("/{id}/confirm")
+-    public OrderResponse confirmOrder(@PathVariable Long id) {
++    @Operation(summary = "Approve a pending order")
++    @PostMapping("/{id}/approve")
++    public OrderResponse approveOrder(@PathVariable Long id) {
+         return toResponse(service.transition(id, OrderStatus.CONFIRMED));
+     }
+ 
+diff --git a/reference-services/conventional-api/src/test/java/io/github/teggr/conventionalapi/OrderLifecycleIntegrationTest.java b/reference-services/conventional-api/src/test/java/io/github/teggr/conventionalapi/OrderLifecycleIntegrationTest.java
+index a8a6698..a0b0f83 100644
+--- a/reference-services/conventional-api/src/test/java/io/github/teggr/conventionalapi/OrderLifecycleIntegrationTest.java
++++ b/reference-services/conventional-api/src/test/java/io/github/teggr/conventionalapi/OrderLifecycleIntegrationTest.java
+@@ -29,8 +29,8 @@ class OrderLifecycleIntegrationTest {
+         Long id = created.getBody().id();
+         assertThat(created.getBody().status()).isEqualTo(OrderStatus.PENDING);
+ 
+-        // Confirm
+-        OrderResponse confirmed = rest.postForObject("/orders/" + id + "/confirm", null, OrderResponse.class);
++        // Approve
++        OrderResponse confirmed = rest.postForObject("/orders/" + id + "/approve", null, OrderResponse.class);
+         assertThat(confirmed.status()).isEqualTo(OrderStatus.CONFIRMED);
+ 
+         // Ship
+@@ -53,4 +53,16 @@ class OrderLifecycleIntegrationTest {
+         OrderResponse cancelled = rest.postForObject("/orders/" + id + "/cancel", null, OrderResponse.class);
+         assertThat(cancelled.status()).isEqualTo(OrderStatus.CANCELLED);
+     }
++
++    @Test
++    void confirmEndpoint_shouldReturnNotFound_afterBreakingChange() {
++        ResponseEntity<OrderResponse> created = rest.postForEntity(
++                "/orders",
++                new CreateOrderRequest("customer-3", "Legacy endpoint check"),
++                OrderResponse.class);
++        Long id = created.getBody().id();
++
++        ResponseEntity<Void> response = rest.postForEntity("/orders/" + id + "/confirm", null, Void.class);
++        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
++    }
+ }
+diff --git a/reference-services/hypermedia-api/src/main/java/io/github/teggr/hypermediaapi/controller/OrderController.java b/reference-services/hypermedia-api/src/main/java/io/github/teggr/hypermediaapi/controller/OrderController.java
+index 206e91f..c2df8f9 100644
+--- a/reference-services/hypermedia-api/src/main/java/io/github/teggr/hypermediaapi/controller/OrderController.java
++++ b/reference-services/hypermedia-api/src/main/java/io/github/teggr/hypermediaapi/controller/OrderController.java
+@@ -80,7 +80,7 @@ public class OrderController {
+         return assembler.toModel(service.findById(id));
+     }
+ 
+-    @PostMapping(value = "/{id}/confirm", produces = {MediaTypes.HAL_FORMS_JSON_VALUE, MediaTypes.HAL_JSON_VALUE})
++    @PostMapping(value = "/{id}/approve", produces = {MediaTypes.HAL_FORMS_JSON_VALUE, MediaTypes.HAL_JSON_VALUE})
+     public OrderModel confirmOrder(@PathVariable Long id) {
+         return assembler.toModel(service.transition(id, OrderStatus.CONFIRMED));
+     }
+diff --git a/reference-services/hypermedia-api/src/test/java/io/github/teggr/hypermediaapi/OrderAffordancesIntegrationTest.java b/reference-services/hypermedia-api/src/test/java/io/github/teggr/hypermediaapi/OrderAffordancesIntegrationTest.java
+index 87965d3..623872b 100644
+--- a/reference-services/hypermedia-api/src/test/java/io/github/teggr/hypermediaapi/OrderAffordancesIntegrationTest.java
++++ b/reference-services/hypermedia-api/src/test/java/io/github/teggr/hypermediaapi/OrderAffordancesIntegrationTest.java
+@@ -88,6 +88,10 @@ class OrderAffordancesIntegrationTest {
+         assertThat(links).containsKey("self");
+         assertThat(links).containsKey("confirm");
+         assertThat(links).containsKey("cancel");
++
++        Map<String, Object> confirmLink = (Map<String, Object>) links.get("confirm");
++        assertThat((String) confirmLink.get("href")).endsWith("/orders/" + id + "/approve");
++
+         // PENDING order must NOT expose ship or deliver
+         assertThat(links).doesNotContainKey("ship");
+         assertThat(links).doesNotContainKey("deliver");
+@@ -104,7 +108,7 @@ class OrderAffordancesIntegrationTest {
+     @SuppressWarnings("unchecked")
+     void confirmedOrder_shouldExposeShipAndCancelLinks_notConfirm() {
+         Long id = createOrder("customer-2", "Gadget order");
+-        postTransition(id, "confirm");
++        postTransitionByRel(id, "confirm");
+ 
+         Map<String, Object> links = (Map<String, Object>) getOrder(id).getBody().get("_links");
+         assertThat(links).containsKey("ship");
+@@ -117,9 +121,9 @@ class OrderAffordancesIntegrationTest {
+     @SuppressWarnings("unchecked")
+     void deliveredOrder_shouldExposeNoTransitionLinks() {
+         Long id = createOrder("customer-3", "Doohickey order");
+-        postTransition(id, "confirm");
+-        postTransition(id, "ship");
+-        postTransition(id, "deliver");
++        postTransitionByRel(id, "confirm");
++        postTransitionByRel(id, "ship");
++        postTransitionByRel(id, "deliver");
+ 
+         Map<String, Object> links = (Map<String, Object>) getOrder(id).getBody().get("_links");
+         assertThat(links).containsKey("self");
+@@ -166,7 +170,11 @@ class OrderAffordancesIntegrationTest {
+         return rest.exchange("/orders", HttpMethod.GET, new HttpEntity<>(headers), Map.class);
+     }
+ 
+-    private void postTransition(Long id, String rel) {
+-        rest.postForObject("/orders/" + id + "/" + rel, null, Map.class);
++    @SuppressWarnings("unchecked")
++    private void postTransitionByRel(Long id, String rel) {
++        Map<String, Object> order = getOrder(id).getBody();
++        Map<String, Object> links = (Map<String, Object>) order.get("_links");
++        Map<String, Object> link = (Map<String, Object>) links.get(rel);
++        rest.postForObject((String) link.get("href"), null, Map.class);
+     }
+ }

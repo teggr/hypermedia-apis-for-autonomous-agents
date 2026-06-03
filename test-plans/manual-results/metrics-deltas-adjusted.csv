@@ -1,0 +1,13 @@
+scenario,mode,elapsed_minutes,raw_metric_count_delta,raw_invalid_4xx_count,outlier_by_duration,adjusted_metric_count_delta,adjusted_invalid_4xx_count,adjustment_note
+S1,conventional,7.95,26,0,false,26,0,No adjustment
+S1,hypermedia,1.23,12,0,false,12,0,No adjustment
+S2,conventional,20.25,143,115,true,40.16,32.0,Adjusted using factor 5.69/20.25 (mode median duration over run duration)
+S2,hypermedia,1.62,13,5,false,13,5,No adjustment
+S3,conventional,3.43,50,33,false,50,33,No adjustment
+S3,hypermedia,1.63,14,5,false,14,5,No adjustment
+S4,conventional,1.42,14,8,false,14,8,No adjustment
+S4,hypermedia,0.98,14,7,false,14,7,No adjustment
+S5,conventional,1.95,34,16,false,34,16,No adjustment
+S5,hypermedia,1.47,18,7,false,18,7,No adjustment
+S6,conventional,13.38,36,10,true,15.31,4.25,Adjusted using factor 5.69/13.38 (mode median duration over run duration)
+S6,hypermedia,4.20,32,8,true,11.81,2.95,Adjusted using factor 1.55/4.20 (mode median duration over run duration)

@@ -1,0 +1,64 @@
+{
+  "beforeCapturedAt" : "2026-06-03T10:51:43.694876900Z",
+  "afterCapturedAt" : "2026-06-03T10:55:55.754836400Z",
+  "distributionSource" : "metrics-tags",
+  "totals" : {
+    "metricCountBefore" : 1.0,
+    "metricCountAfter" : 33.0,
+    "metricCountDelta" : 32.0,
+    "newExchangeCount" : 0,
+    "invalid4xxCount" : 8
+  },
+  "statusDistribution" : {
+    "2xx" : 26,
+    "3xx" : 0,
+    "4xx" : 8,
+    "5xx" : 0
+  },
+  "operationDistribution" : [ {
+    "method" : "POST",
+    "uri" : "/orders",
+    "count" : 8
+  }, {
+    "method" : "POST",
+    "uri" : "/orders/{id}/cancel",
+    "count" : 2
+  }, {
+    "method" : "POST",
+    "uri" : "/orders/{id}/confirm",
+    "count" : 4
+  }, {
+    "method" : "GET",
+    "uri" : "/orders",
+    "count" : 5
+  }, {
+    "method" : "GET",
+    "uri" : "/actuator/metrics/{requiredMetricName}",
+    "count" : 18
+  }, {
+    "method" : "GET",
+    "uri" : "/orders/{id}",
+    "count" : 2
+  }, {
+    "method" : "GET",
+    "uri" : "/actuator",
+    "count" : 2
+  }, {
+    "method" : "GET",
+    "uri" : "/actuator/health",
+    "count" : 1
+  }, {
+    "method" : "GET",
+    "uri" : "/**",
+    "count" : 5
+  }, {
+    "method" : "GET",
+    "uri" : "/",
+    "count" : 1
+  } ],
+  "scenario" : "S6",
+  "mode" : "hypermedia",
+  "baseUrl" : "http://localhost:8081",
+  "beforeFile" : "test-plans/manual-results/S6/hypermedia/before-20260603-105143.json",
+  "afterFile" : "test-plans/manual-results/S6/hypermedia/after-20260603-105555.json"
+}
