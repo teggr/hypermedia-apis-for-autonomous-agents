@@ -23,6 +23,7 @@ HATEOAS (Hypertext As The Engine Of Application State) is a REST constraint wher
 - **State-aware affordances**: Only valid transitions/actions are included in responses, reducing hallucination risk
 - **Self-describing interfaces**: Agents can navigate an API by following links without pre-loaded tool schemas
 - **Reduced brittleness**: Agents are less sensitive to API changes because they follow links rather than hardcoded paths
+- **State-rich context**: Responses can carry both resource state and authorized-user state, so the agent does not need all tools, skills, or MCP definitions preloaded just to understand what is valid now
 
 ### Potential Benefits for Autonomous Agents
 
@@ -85,13 +86,16 @@ Based on the current captured runs (S1-S6) and caveated analysis artifacts in `t
 
 - **Raw API without discoverable contract** shows the highest ambiguity and guesswork risk.
 - **Conventional API with discoverable OpenAPI** improves speed and accuracy when docs are reliably found and used.
-- **Hypermedia API with state-aware affordances** tends to improve speed and accuracy further for stateful multi-step workflows, because valid next actions are carried in the response and scoped by resource state.
+- **Hypermedia API with state-aware affordances** tends to improve speed and accuracy further for stateful multi-step workflows, because valid next actions are carried in the response and scoped by both resource state and authorized-user state.
+
+This also reduces the amount of static context that must be loaded upfront, because the agent does not need to preload every tool or skill definition just to determine the next valid step.
 
 ### When Hypermedia Is Preferable
 
 - Multi-step, stateful workflows
 - High cost of invalid transitions
 - Frequent endpoint/workflow evolution where link/rel stability is easier to preserve than hardcoded paths
+- Situations where user authorization and resource state both matter for deciding the next action
 
 ### When Static Contracts Are Sufficient
 

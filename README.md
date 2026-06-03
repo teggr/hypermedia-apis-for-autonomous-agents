@@ -1,125 +1,119 @@
 # Hypermedia APIs for Autonomous Agents
 
-This repository investigates whether hypermedia-driven APIs (HATEOAS / REST Level 3), especially HAL-FORMS affordances, provide practical advantages for autonomous AI agents compared to conventional OpenAPI + MCP/skill-based integrations.
+Autonomous agents are getting better at calling tools, but most integrations still assume a static contract model: give the model a fixed list of operations, hope it chooses well, and update the integration every time APIs evolve.
 
-## Source Conversations
+That includes many MCP and CLI-wrapped skill patterns. They improve invocation ergonomics, and they can carry more state if the request/response loop is designed to do so, but they still drift when contracts go stale and they still expose broad action menus unless enough state context is carried with each step.
 
-The project direction is grounded in two conversation artifacts:
+This project asks a narrower and practical question:
 
-- [conversations/chat-gpt-conversation.md](conversations/chat-gpt-conversation.md): full narrative discussion and prototype ideas
-- [conversations/hateoas-for-agent-systems.md](conversations/hateoas-for-agent-systems.md): distilled summary of hypotheses, benefits, challenges, and proposed experiments
+Can we get better agent behavior by moving from static API contracts to state-aware hypermedia affordances?
 
-If there is a mismatch between documents, treat the full conversation as the canonical source and update the summary to match it.
+## Why This Matters
 
-## Core Hypothesis
+In many real workflows, the hardest part is not issuing HTTP requests. It is deciding what the valid next action is at each step.
 
-Agents may behave more like web browsers than SDK consumers:
+Static contract integrations often force the agent to reason over a global operation set. Hypermedia aims to reduce that burden by returning context-valid transitions directly in each response.
 
-- Discover capabilities at runtime from server-provided links and action templates
-- Follow state-dependent affordances instead of invoking a static global tool list
-- Adapt better to endpoint/workflow evolution because navigation is link-driven
+In practice, this is the key distinction: static wrappers (including MCP tools and CLI skills) describe what can be called in general, while HAL-FORMS-style affordances describe what should be called now, for this state. By carrying state in the response, we also reduce the amount of static context we need to load upfront, because we do not need every tool or skill definition in memory before deciding the next action. That state should include both the state of the data and the state of the authorized user, because fixed contracts do not always encode the runtime permissions and context that determine whether an action is actually valid. When we call the API directly, we cut out the middleman and reduce synchronization issues between an external wrapper and the live system state.
 
-## What This Repo Compares
+For long-lived agent integrations, that shift has architectural implications:
 
-1. A conventional API exposed through static contracts (OpenAPI + MCP/tool wrappers)
-2. A hypermedia API that returns dynamic, state-aware affordances (HAL/HAL-FORMS)
+- less brittle coupling to endpoint shapes
+- fewer invalid transition attempts
+- lower ambiguity in multi-step stateful flows
 
-Both are exercised by Copilot Chat or Copilot CLI prompts to evaluate:
+## Hypothesis
 
-- correctness
-- efficiency (calls/tokens)
-- robustness (invalid/hallucinated operations)
-- adaptability to API evolution
-- developer integration effort
+The working hypothesis for this experiment is:
 
-## Project Layout
+1. Raw API usage without discoverable contracts produces the highest ambiguity and guesswork.
+2. OpenAPI-discoverable conventional APIs improve speed and accuracy when docs are found and used.
+3. Hypermedia APIs improve speed and accuracy further for stateful workflows because valid next actions are carried with state.
 
-- `reference-services/conventional-api`: baseline service using conventional REST patterns
-- `reference-services/hypermedia-api`: service using Spring HATEOAS affordances
-- `test-plans`: scenario plans and evaluation criteria
-- `conversations`: source reasoning and distilled findings
+This hypothesis was derived from the source conversation and tested directionally in this repository.
 
-## Experiment Runbook
+## What We Built
 
-Use this runbook to execute comparable baseline experiments before implementing the full
-automated evaluation harness.
+We implemented the same order-management domain in two styles:
 
-### 1) Build all modules
+1. Conventional REST service with static contract orientation.
+2. Hypermedia service with Spring HATEOAS and HAL-FORMS affordances.
 
-```powershell
-mvn clean verify
-```
+Both were exercised through Copilot-driven scenario prompts across S1-S6.
 
-### 2) Start both reference services
+Project structure:
 
-Open two terminals from the repository root:
+- `reference-services/conventional-api`
+- `reference-services/hypermedia-api`
+- `test-plans`
+- `conversations`
 
-```powershell
-mvn -pl reference-services/conventional-api spring-boot:run
-```
+## How We Measured It
 
-```powershell
-mvn -pl reference-services/hypermedia-api spring-boot:run
-```
+We captured service-side evidence through Actuator snapshots before and after each scenario run, then produced per-scenario deltas.
 
-Expected base URLs:
+Measured dimensions in current artifacts include:
 
-- Conventional API: `http://localhost:8080`
-- Hypermedia API: `http://localhost:8081`
+- API call deltas
+- invalid attempt indicators (4xx)
+- status distribution and operation distribution
 
-### 3) Use Copilot Chat or Copilot CLI as the executing agent
+Operational steps and commands were moved to:
 
-This repository now treats Copilot as the primary execution agent. Use the same
-scenario prompts against both services.
+- `test-plans/experiment-runbook.md`
 
-- Prompt suite: `test-plans/copilot-prompt-suite.md`
-- Scenario definitions: `test-plans/order-management.md`
+## Findings (Current Dataset)
 
-### 4) Capture service-side evidence from Actuator
+From S1-S6 directional evidence:
 
-Use the JBang capture script to take before/after snapshots and compute per-scenario deltas.
+- Hypermedia usually showed lower API-call and 4xx pressure in the more stateful scenarios.
+- Conventional results were more sensitive to discovery behavior, especially where non-domain traffic appeared.
+- The relative pattern supports the architectural intuition that state-aware affordances reduce next-step ambiguity.
 
-Conventional mode example:
+## Caveats You Should Take Seriously
 
-```powershell
-jbang scripts/actuator-delta.java start --scenario S1 --mode conventional --base-url http://localhost:8080
-# Run the S1 prompt in Copilot against conventional API
-jbang scripts/actuator-delta.java finish --scenario S1 --mode conventional --base-url http://localhost:8080
-```
+These findings are intentionally caveated.
 
-Hypermedia mode example:
+Known limits in current evidence:
 
-```powershell
-jbang scripts/actuator-delta.java start --scenario S1 --mode hypermedia --base-url http://localhost:8081
-# Run the S1 prompt in Copilot against hypermedia API
-jbang scripts/actuator-delta.java finish --scenario S1 --mode hypermedia --base-url http://localhost:8081
-```
+- some runs were interruption-prone and required time-based adjustment
+- conventional runs can be skewed by non-domain traffic (docs, swagger, actuator)
+- token usage was projected directionally, not directly instrumented per run
+- several hypotheses still require targeted experiments (for example H2/H4/H7/H8)
 
-The script captures:
+Key supporting artifacts:
 
-- `/actuator/metrics/http.server.requests`
-- `/actuator/httpexchanges`
-- Delta summary including request-count delta, new exchange count, 4xx count, status buckets, and operation distribution
+- `test-plans/manual-results/summary.md`
+- `test-plans/manual-results/metrics-deltas-adjusted.csv`
+- `test-plans/manual-results/normalization-notes.md`
+- `test-plans/manual-results/verdict-draft.md`
 
-### 5) Store experiment artifacts
+## Conclusion
 
-For each run, store:
+Given the current caveated evidence, the practical recommendation is:
 
-- Prompt text
-- Copilot response summary
-- Relevant API response snippets
-- Scenario result and final order status
-- Actuator metric snapshots and HTTP exchange traces
+1. Use static contracts where workflows are simple, stable, and OpenAPI/MCP discovery is reliably available.
+2. Prefer hypermedia for stateful, multi-step agent workflows where adaptability and transition safety matter.
 
-Recommended location for manual notes and snapshots:
+Put differently: MCP and CLI-wrapped skills are helpful, and they can be improved by carrying state through their requests and responses, but without that they inherit the same core limitations as other static contracts. Direct API traversal removes an extra synchronization layer, so the agent stays closer to the source of truth and avoids loading unnecessary upfront tool context while also keeping user authorization and data state in sync.
 
-- `test-plans/manual-results/`
+This is directional guidance, not final-proof. It is strong enough for current architecture decisions, while still leaving clear follow-up work for tighter validation.
 
-### 6) Fairness checklist before comparing outcomes
+## Where This Goes Next
 
-- Same prompt text for both modes
-- Same starting dataset/fixture state
-- Same Copilot execution mode (Chat window or CLI) and prompt format
-- Same retry policy and timeout assumptions
+The next high-value improvements are:
 
-This runbook is the primary execution workflow for the checklist in `ROADMAP.md`.
+1. deterministic reset/seed between runs
+2. scripted Copilot CLI execution for cleaner repeatability
+3. targeted follow-up experiments for unresolved hypotheses
+
+Progress tracking remains in:
+
+- `ROADMAP.md`
+
+## Canonical Sources
+
+If summary docs diverge, treat the full conversation as canonical:
+
+- `conversations/chat-gpt-conversation.md`
+- `conversations/hateoas-for-agent-systems.md`

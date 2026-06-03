@@ -164,7 +164,7 @@ This roadmap defines all tasks required to answer the hypotheses from the conver
 
 ## Implementation Progress (Current)
 
-- [x] Added experiment runbook to `README.md` with reproducible Maven and runtime commands.
+- [x] Added dedicated experiment runbook at `test-plans/experiment-runbook.md` with reproducible Maven/runtime commands and evidence-capture flow.
 - [x] Added baseline parity gate checklist at `test-plans/baseline-parity-checklist.md`.
 - [x] Added Copilot prompt suite at `test-plans/copilot-prompt-suite.md` for S1-S6 execution.
 - [x] Pivoted measurement strategy to service-side Actuator endpoints so Copilot Chat/CLI can act as the execution agent.
@@ -181,6 +181,7 @@ This roadmap defines all tasks required to answer the hypotheses from the conver
 - [x] Decision: proceed with caveated interpretation for current phase (no immediate reruns), using normalization and outlier-adjusted artifacts as directional evidence.
 - [x] Updated `conversations/hateoas-for-agent-systems.md` with a caveated empirical recommendation section aligned to current evidence artifacts.
 - [x] Verified recommendation wording remains consistent with `conversations/chat-gpt-conversation.md` themes (runtime discovery, state-aware affordances, resilience, and caveated efficiency tradeoffs).
+- [x] Rewrote `README.md` as an article-style narrative (why, hypothesis, method, findings, caveats, conclusion) and moved operational command detail into `test-plans/experiment-runbook.md`.
 - [ ] Next: add deterministic data reset/seed operations between scenarios.
 - [ ] Next: add scriptable Copilot CLI scenario execution and evidence export for S1 and S2.
 
