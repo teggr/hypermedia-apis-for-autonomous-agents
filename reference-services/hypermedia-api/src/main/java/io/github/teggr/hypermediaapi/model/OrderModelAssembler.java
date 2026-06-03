@@ -3,6 +3,7 @@ package io.github.teggr.hypermediaapi.model;
 import io.github.teggr.hypermediaapi.controller.OrderController;
 import io.github.teggr.hypermediaapi.domain.Order;
 import io.github.teggr.hypermediaapi.domain.OrderStatus;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 
@@ -28,8 +29,7 @@ public class OrderModelAssembler extends RepresentationModelAssemblerSupport<Ord
     public OrderModel toModel(Order order) {
         OrderModel model = new OrderModel(order);
 
-        // self link — always present
-        model.add(linkTo(methodOn(OrderController.class).getOrder(order.getId())).withSelfRel());
+        Link self = linkTo(methodOn(OrderController.class).getOrder(order.getId())).withSelfRel();
 
         // collection link — always present
         model.add(linkTo(methodOn(OrderController.class).listOrders(null, null)).withRel("orders"));
@@ -38,17 +38,23 @@ public class OrderModelAssembler extends RepresentationModelAssemblerSupport<Ord
         OrderStatus status = order.getStatus();
 
         if (status.canTransitionTo(OrderStatus.CONFIRMED)) {
+            self = self.andAffordance(afford(methodOn(OrderController.class).confirmOrder(order.getId())));
             model.add(linkTo(methodOn(OrderController.class).confirmOrder(order.getId())).withRel("confirm"));
         }
         if (status.canTransitionTo(OrderStatus.SHIPPED)) {
+            self = self.andAffordance(afford(methodOn(OrderController.class).shipOrder(order.getId())));
             model.add(linkTo(methodOn(OrderController.class).shipOrder(order.getId())).withRel("ship"));
         }
         if (status.canTransitionTo(OrderStatus.DELIVERED)) {
+            self = self.andAffordance(afford(methodOn(OrderController.class).deliverOrder(order.getId())));
             model.add(linkTo(methodOn(OrderController.class).deliverOrder(order.getId())).withRel("deliver"));
         }
         if (status.canTransitionTo(OrderStatus.CANCELLED)) {
+            self = self.andAffordance(afford(methodOn(OrderController.class).cancelOrder(order.getId())));
             model.add(linkTo(methodOn(OrderController.class).cancelOrder(order.getId())).withRel("cancel"));
         }
+
+        model.add(self);
 
         return model;
     }

@@ -1,0 +1,84 @@
+{
+  "capturedAt" : "2026-06-03T09:43:39.419166400Z",
+  "scenario" : "S2",
+  "mode" : "hypermedia",
+  "baseUrl" : "http://localhost:8081",
+  "metricsUri" : "http://localhost:8081/actuator/metrics/http.server.requests",
+  "httpexchangesUri" : "http://localhost:8081/actuator/httpexchanges",
+  "metrics" : {
+    "name" : "http.server.requests",
+    "baseUnit" : "seconds",
+    "measurements" : [ {
+      "statistic" : "COUNT",
+      "value" : 14.0
+    }, {
+      "statistic" : "TOTAL_TIME",
+      "value" : 0.8399071
+    }, {
+      "statistic" : "MAX",
+      "value" : 0.5104401
+    } ],
+    "availableTags" : [ {
+      "tag" : "exception",
+      "values" : [ "none" ]
+    }, {
+      "tag" : "method",
+      "values" : [ "POST", "GET" ]
+    }, {
+      "tag" : "error",
+      "values" : [ "none" ]
+    }, {
+      "tag" : "uri",
+      "values" : [ "/orders", "/actuator/metrics/{requiredMetricName}", "/orders/{id}", "/orders/{id}/cancel", "/actuator", "/orders/{id}/confirm", "/**" ]
+    }, {
+      "tag" : "outcome",
+      "values" : [ "CLIENT_ERROR", "SUCCESS" ]
+    }, {
+      "tag" : "status",
+      "values" : [ "404", "200", "201" ]
+    } ]
+  },
+  "metricsBreakdown" : {
+    "statusCounts" : {
+      "404" : 5.0,
+      "200" : 11.0,
+      "201" : 1.0
+    },
+    "operationCounts" : [ {
+      "method" : "POST",
+      "uri" : "/orders",
+      "count" : 1.0
+    }, {
+      "method" : "POST",
+      "uri" : "/orders/{id}/cancel",
+      "count" : 1.0
+    }, {
+      "method" : "POST",
+      "uri" : "/orders/{id}/confirm",
+      "count" : 1.0
+    }, {
+      "method" : "GET",
+      "uri" : "/orders",
+      "count" : 1.0
+    }, {
+      "method" : "GET",
+      "uri" : "/actuator/metrics/{requiredMetricName}",
+      "count" : 15.0
+    }, {
+      "method" : "GET",
+      "uri" : "/orders/{id}",
+      "count" : 1.0
+    }, {
+      "method" : "GET",
+      "uri" : "/actuator",
+      "count" : 2.0
+    }, {
+      "method" : "GET",
+      "uri" : "/**",
+      "count" : 5.0
+    } ]
+  },
+  "httpexchanges" : {
+    "exchanges" : [ ]
+  }
+}

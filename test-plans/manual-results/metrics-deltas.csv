@@ -1,0 +1,10 @@
+after_captured_at,scenario,mode,base_url,metric_count_before,metric_count_after,metric_count_delta,new_exchange_count,invalid_4xx_count,status_2xx,status_3xx,status_4xx,status_5xx
+"2026-06-03T08:02:56.499290Z","S1","conventional","http://localhost:8080",7.0,33.0,26.0,0,0,0,0,0,0
+"2026-06-03T09:07:55.866975200Z","S1","hypermedia","http://localhost:8081",1.0,15.0,14.0,0,0,0,0,0,0
+"2026-06-03T09:10:37.957712200Z","S1","hypermedia","http://localhost:8081",1.0,13.0,12.0,0,0,0,0,0,0
+"2026-06-03T09:41:50.172485700Z","S2","conventional","http://localhost:8080",1.0,144.0,143.0,0,115,31,0,115,0
+"2026-06-03T09:43:39.419166400Z","S2","hypermedia","http://localhost:8081",1.0,14.0,13.0,0,5,10,0,5,0
+"2026-06-03T09:57:36.573893100Z","S3","conventional","http://localhost:8080",1.0,51.0,50.0,0,33,18,1,33,0
+"2026-06-03T09:59:23.349423500Z","S3","hypermedia","http://localhost:8081",1.0,15.0,14.0,0,5,11,0,5,0
+"2026-06-03T10:02:08.321571400Z","S4","conventional","http://localhost:8080",1.0,15.0,14.0,0,8,9,0,8,0
+"2026-06-03T10:03:23.813559300Z","S4","hypermedia","http://localhost:8081",1.0,15.0,14.0,0,7,10,0,7,0

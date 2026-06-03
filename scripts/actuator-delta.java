@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -27,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 
 class actuator_delta {
 
@@ -48,6 +50,7 @@ class actuator_delta {
         String scenario = required(options, "--scenario");
         String mode = required(options, "--mode");
         String baseUrlRaw = required(options, "--base-url");
+        String actuatorBasePath = options.get("--actuator-base-path");
 
         URI baseUrl = URI.create(baseUrlRaw);
         String resultsDirRaw = options.getOrDefault("--results-dir", "test-plans/manual-results");
@@ -66,12 +69,12 @@ class actuator_delta {
         Path workFile = workDir.resolve(runKey + ".json");
 
         if ("start".equalsIgnoreCase(command)) {
-            doStart(baseUrl, scenario, mode, scenarioDir, workFile);
+            doStart(baseUrl, scenario, mode, actuatorBasePath, scenarioDir, workFile);
             return;
         }
 
         if ("finish".equalsIgnoreCase(command)) {
-            doFinish(baseUrl, scenario, mode, scenarioDir, workFile, resultsDir);
+            doFinish(baseUrl, scenario, mode, actuatorBasePath, scenarioDir, workFile, resultsDir);
             return;
         }
 
@@ -82,10 +85,11 @@ class actuator_delta {
         URI baseUrl,
         String scenario,
         String mode,
+        String actuatorBasePath,
         Path scenarioDir,
         Path workFile
     ) throws Exception {
-        Snapshot before = fetchSnapshot(baseUrl, scenario, mode);
+        Snapshot before = fetchSnapshot(baseUrl, scenario, mode, actuatorBasePath);
         String stamp = TS_FILE_FORMAT.format(before.capturedAt());
 
         Path beforeFile = scenarioDir.resolve("before-" + stamp + ".json");
@@ -107,6 +111,7 @@ class actuator_delta {
         URI baseUrl,
         String scenario,
         String mode,
+        String actuatorBasePath,
         Path scenarioDir,
         Path workFile,
         Path resultsDir
@@ -123,7 +128,7 @@ class actuator_delta {
             throw new IllegalStateException("Invalid start snapshot session file: " + workFile);
         }
 
-        Snapshot after = fetchSnapshot(baseUrl, scenario, mode);
+        Snapshot after = fetchSnapshot(baseUrl, scenario, mode, actuatorBasePath);
         String afterStamp = TS_FILE_FORMAT.format(after.capturedAt());
         Path afterFile = scenarioDir.resolve("after-" + afterStamp + ".json");
         JSON.writeValue(afterFile.toFile(), after.payload());
@@ -153,16 +158,32 @@ class actuator_delta {
     }
 
     private static Snapshot fetchSnapshot(URI baseUrl, String scenario, String mode) throws Exception {
+        return fetchSnapshot(baseUrl, scenario, mode, null);
+    }
+
+    private static Snapshot fetchSnapshot(
+        URI baseUrl,
+        String scenario,
+        String mode,
+        String actuatorBasePath
+    ) throws Exception {
         Instant capturedAt = Instant.now();
-        JsonNode metrics = fetchJson(baseUrl.resolve("/actuator/metrics/http.server.requests"));
-        JsonNode exchanges = fetchJson(baseUrl.resolve("/actuator/httpexchanges"));
+        EndpointPair endpointPair = resolveActuatorEndpoints(baseUrl, actuatorBasePath);
+        JsonNode metrics = fetchHttpServerRequestsMetric(
+            endpointPair.metricsUri(),
+            endpointPair.metricsCollectionUri()
+        );
+        JsonNode exchanges = fetchHttpExchangesOrEmpty(endpointPair.httpExchangesUri());
 
         ObjectNode payload = JSON.createObjectNode();
         payload.put("capturedAt", capturedAt.toString());
         payload.put("scenario", scenario);
         payload.put("mode", mode);
         payload.put("baseUrl", baseUrl.toString());
+        payload.put("metricsUri", endpointPair.metricsUri().toString());
+        payload.put("httpexchangesUri", endpointPair.httpExchangesUri().toString());
         payload.set("metrics", metrics);
+        payload.set("metricsBreakdown", fetchMetricsBreakdown(endpointPair.metricsUri(), metrics));
         payload.set("httpexchanges", exchanges);
 
         return new Snapshot(capturedAt, payload);
@@ -184,6 +205,184 @@ class actuator_delta {
         return JSON.readTree(response.body());
     }
 
+    private static EndpointPair resolveActuatorEndpoints(URI baseUrl, String actuatorBasePath) throws Exception {
+        List<String> basePathCandidates = new ArrayList<>();
+        if (actuatorBasePath != null && !actuatorBasePath.isBlank()) {
+            basePathCandidates.add(normalizeBasePath(actuatorBasePath));
+        }
+        basePathCandidates.add("/actuator");
+        basePathCandidates.add("/manage");
+        basePathCandidates.add("/management");
+        basePathCandidates.add("");
+
+        List<String> tried = new ArrayList<>();
+
+        for (String basePath : basePathCandidates) {
+            URI indexUri = buildActuatorUri(baseUrl, basePath, "");
+            Optional<JsonNode> index = fetchJsonIfSuccessful(indexUri);
+            if (index.isPresent()) {
+                EndpointPair fromLinks = resolveFromActuatorLinks(baseUrl, index.get());
+                if (fromLinks != null) {
+                    return fromLinks;
+                }
+            }
+
+            URI metricsUri = buildActuatorUri(baseUrl, basePath, "metrics/http.server.requests");
+            URI exchangesUri = buildActuatorUri(baseUrl, basePath, "httpexchanges");
+
+            tried.add(metricsUri.toString());
+            tried.add(exchangesUri.toString());
+
+            Optional<JsonNode> metrics = fetchJsonIfSuccessful(metricsUri);
+            if (metrics.isPresent()) {
+                URI metricsCollectionUri = buildActuatorUri(baseUrl, basePath, "metrics");
+                return new EndpointPair(metricsUri, metricsCollectionUri, exchangesUri);
+            }
+        }
+
+        throw new IOException(
+            "Could not find Actuator metrics/httpexchanges endpoints for base URL " + baseUrl
+                + ". Tried: " + String.join(", ", tried)
+                + ". Verify the intended service is running on this port and that Actuator endpoints are exposed."
+        );
+    }
+
+    private static EndpointPair resolveFromActuatorLinks(URI baseUrl, JsonNode actuatorIndex) {
+        JsonNode links = actuatorIndex.path("_links");
+        if (!links.isObject()) {
+            return null;
+        }
+
+        String metricsHref = links.path("metrics").path("href").asText("");
+        if (metricsHref.isBlank()) {
+            return null;
+        }
+
+        URI metricsUri = resolveLinkedUri(baseUrl, metricsHref + "/http.server.requests");
+        URI metricsCollectionUri = resolveLinkedUri(baseUrl, metricsHref);
+
+        String exchangesHref = links.path("httpexchanges").path("href").asText("");
+        URI exchangesUri = exchangesHref.isBlank()
+            ? resolveLinkedUri(baseUrl, "/actuator/httpexchanges")
+            : resolveLinkedUri(baseUrl, exchangesHref);
+
+        return new EndpointPair(metricsUri, metricsCollectionUri, exchangesUri);
+    }
+
+    private static JsonNode fetchHttpServerRequestsMetric(URI metricUri, URI metricsCollectionUri) throws Exception {
+        HttpRequest request = HttpRequest.newBuilder(metricUri)
+            .header("Accept", "application/json")
+            .GET()
+            .build();
+
+        HttpResponse<String> response = HttpClient.newHttpClient()
+            .send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+
+        if (response.statusCode() >= 200 && response.statusCode() < 300) {
+            return JSON.readTree(response.body());
+        }
+
+        if (response.statusCode() == 404 && isHttpServerRequestsMissing(metricsCollectionUri)) {
+            ObjectNode synthetic = JSON.createObjectNode();
+            synthetic.put("name", "http.server.requests");
+            ArrayNode measurements = synthetic.putArray("measurements");
+            ObjectNode count = measurements.addObject();
+            count.put("statistic", "COUNT");
+            count.put("value", 0.0);
+            synthetic.putArray("availableTags");
+            return synthetic;
+        }
+
+        throw new IOException("Request failed for " + metricUri + " with status " + response.statusCode());
+    }
+
+    private static boolean isHttpServerRequestsMissing(URI metricsCollectionUri) {
+        try {
+            JsonNode metricsCollection = fetchJson(metricsCollectionUri);
+            JsonNode names = metricsCollection.path("names");
+            if (!names.isArray()) {
+                return true;
+            }
+
+            for (JsonNode name : names) {
+                if ("http.server.requests".equals(name.asText(""))) {
+                    return false;
+                }
+            }
+
+            return true;
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
+
+    private static JsonNode fetchHttpExchangesOrEmpty(URI exchangesUri) {
+        Optional<JsonNode> response = fetchJsonIfSuccessful(exchangesUri);
+        if (response.isPresent()) {
+            return response.get();
+        }
+
+        ObjectNode fallback = JSON.createObjectNode();
+        fallback.putArray("exchanges");
+        return fallback;
+    }
+
+    private static URI resolveLinkedUri(URI baseUrl, String href) {
+        if (href == null || href.isBlank()) {
+            return baseUrl;
+        }
+        return baseUrl.resolve(href);
+    }
+
+    private static Optional<JsonNode> fetchJsonIfSuccessful(URI uri) {
+        try {
+            HttpRequest request = HttpRequest.newBuilder(uri)
+                .header("Accept", "application/json")
+                .GET()
+                .build();
+
+            HttpResponse<String> response = HttpClient.newHttpClient()
+                .send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+
+            if (response.statusCode() < 200 || response.statusCode() >= 300) {
+                return Optional.empty();
+            }
+
+            return Optional.of(JSON.readTree(response.body()));
+        } catch (Exception ignored) {
+            return Optional.empty();
+        }
+    }
+
+    private static String normalizeBasePath(String basePath) {
+        String trimmed = basePath == null ? "" : basePath.trim();
+        if (trimmed.isEmpty() || "/".equals(trimmed)) {
+            return "";
+        }
+        String withLeadingSlash = trimmed.startsWith("/") ? trimmed : "/" + trimmed;
+        return withLeadingSlash.endsWith("/") ? withLeadingSlash.substring(0, withLeadingSlash.length() - 1) : withLeadingSlash;
+    }
+
+    private static URI buildActuatorUri(URI baseUrl, String basePath, String tail) {
+        String normalizedBasePath = normalizeBasePath(basePath);
+        String normalizedTail = tail == null ? "" : tail.trim();
+
+        StringBuilder path = new StringBuilder();
+        path.append(normalizedBasePath);
+        if (!normalizedTail.isEmpty()) {
+            if (path.isEmpty() || path.charAt(path.length() - 1) != '/') {
+                path.append('/');
+            }
+            path.append(normalizedTail.startsWith("/") ? normalizedTail.substring(1) : normalizedTail);
+        }
+
+        if (path.isEmpty()) {
+            path.append('/');
+        }
+
+        return baseUrl.resolve(path.toString());
+    }
+
     private static ObjectNode buildDelta(JsonNode before, JsonNode after) {
         double beforeCount = extractMetricCount(before.path("metrics"));
         double afterCount = extractMetricCount(after.path("metrics"));
@@ -198,6 +397,7 @@ class actuator_delta {
         int status4xx = 0;
         int status5xx = 0;
         Map<String, Integer> operationCounts = new LinkedHashMap<>();
+        String distributionSource = "httpexchanges";
 
         for (JsonNode exchange : newExchanges) {
             int status = parseInt(exchange.path("response").path("status").asText("0"));
@@ -217,9 +417,31 @@ class actuator_delta {
             operationCounts.merge(operation, 1, Integer::sum);
         }
 
+        if (newExchanges.isEmpty()) {
+            Map<String, Integer> statusDeltas = diffStatusCounts(
+                before.path("metricsBreakdown").path("statusCounts"),
+                after.path("metricsBreakdown").path("statusCounts")
+            );
+
+            status2xx = sumByRange(statusDeltas, 200, 299);
+            status3xx = sumByRange(statusDeltas, 300, 399);
+            status4xx = sumByRange(statusDeltas, 400, 499);
+            status5xx = sumByRange(statusDeltas, 500, 599);
+
+            operationCounts = diffOperationCounts(
+                before.path("metricsBreakdown").path("operationCounts"),
+                after.path("metricsBreakdown").path("operationCounts")
+            );
+
+            distributionSource = operationCounts.isEmpty() && statusDeltas.isEmpty()
+                ? "none"
+                : "metrics-tags";
+        }
+
         ObjectNode delta = JSON.createObjectNode();
         delta.put("beforeCapturedAt", before.path("capturedAt").asText(""));
         delta.put("afterCapturedAt", after.path("capturedAt").asText(""));
+        delta.put("distributionSource", distributionSource);
 
         ObjectNode totals = delta.putObject("totals");
         totals.put("metricCountBefore", beforeCount);
@@ -248,6 +470,151 @@ class actuator_delta {
         }
 
         return delta;
+    }
+
+    private static ObjectNode fetchMetricsBreakdown(URI metricUri, JsonNode metricsNode) {
+        ObjectNode breakdown = JSON.createObjectNode();
+        ObjectNode statusCounts = breakdown.putObject("statusCounts");
+        ArrayNode operationCounts = breakdown.putArray("operationCounts");
+
+        List<String> statuses = extractTagValues(metricsNode, "status");
+        for (String status : statuses) {
+            double count = queryMetricCount(metricUri, List.of("status:" + status));
+            statusCounts.put(status, count);
+        }
+
+        List<String> methods = extractTagValues(metricsNode, "method");
+        List<String> uris = extractTagValues(metricsNode, "uri");
+        for (String method : methods) {
+            for (String uri : uris) {
+                double count = queryMetricCount(metricUri, List.of("method:" + method, "uri:" + uri));
+                if (count <= 0) {
+                    continue;
+                }
+
+                ObjectNode op = operationCounts.addObject();
+                op.put("method", method);
+                op.put("uri", uri);
+                op.put("count", count);
+            }
+        }
+
+        return breakdown;
+    }
+
+    private static double queryMetricCount(URI metricUri, List<String> tags) {
+        try {
+            StringBuilder query = new StringBuilder();
+            for (String tag : tags) {
+                if (query.length() > 0) {
+                    query.append('&');
+                }
+                query.append("tag=").append(URLEncoder.encode(tag, StandardCharsets.UTF_8));
+            }
+
+            URI uriWithTags = metricUri;
+            if (query.length() > 0) {
+                String separator = metricUri.toString().contains("?") ? "&" : "?";
+                uriWithTags = URI.create(metricUri + separator + query);
+            }
+
+            JsonNode response = fetchJson(uriWithTags);
+            return extractMetricCount(response);
+        } catch (Exception ignored) {
+            return 0;
+        }
+    }
+
+    private static List<String> extractTagValues(JsonNode metricsNode, String tagName) {
+        List<String> values = new ArrayList<>();
+        JsonNode availableTags = metricsNode.path("availableTags");
+        if (!availableTags.isArray()) {
+            return values;
+        }
+
+        for (JsonNode tag : availableTags) {
+            if (!tagName.equals(tag.path("tag").asText(""))) {
+                continue;
+            }
+            JsonNode tagValues = tag.path("values");
+            if (!tagValues.isArray()) {
+                continue;
+            }
+            for (JsonNode value : tagValues) {
+                String text = value.asText("");
+                if (!text.isBlank()) {
+                    values.add(text);
+                }
+            }
+            break;
+        }
+
+        return values;
+    }
+
+    private static Map<String, Integer> diffStatusCounts(JsonNode beforeStatus, JsonNode afterStatus) {
+        Map<String, Integer> deltas = new LinkedHashMap<>();
+        if (!afterStatus.isObject()) {
+            return deltas;
+        }
+
+        Iterator<Map.Entry<String, JsonNode>> fields = afterStatus.fields();
+        while (fields.hasNext()) {
+            Map.Entry<String, JsonNode> field = fields.next();
+            String status = field.getKey();
+            int after = (int) Math.round(field.getValue().asDouble(0));
+            int before = (int) Math.round(beforeStatus.path(status).asDouble(0));
+            int delta = Math.max(0, after - before);
+            if (delta > 0) {
+                deltas.put(status, delta);
+            }
+        }
+
+        return deltas;
+    }
+
+    private static int sumByRange(Map<String, Integer> statusDeltas, int min, int max) {
+        int sum = 0;
+        for (Map.Entry<String, Integer> entry : statusDeltas.entrySet()) {
+            int code = parseInt(entry.getKey());
+            if (code >= min && code <= max) {
+                sum += entry.getValue();
+            }
+        }
+        return sum;
+    }
+
+    private static Map<String, Integer> diffOperationCounts(JsonNode beforeOps, JsonNode afterOps) {
+        Map<String, Integer> beforeMap = toOperationCountMap(beforeOps);
+        Map<String, Integer> afterMap = toOperationCountMap(afterOps);
+
+        Map<String, Integer> deltas = new LinkedHashMap<>();
+        for (Map.Entry<String, Integer> entry : afterMap.entrySet()) {
+            String key = entry.getKey();
+            int delta = Math.max(0, entry.getValue() - beforeMap.getOrDefault(key, 0));
+            if (delta > 0) {
+                deltas.put(key, delta);
+            }
+        }
+
+        return deltas;
+    }
+
+    private static Map<String, Integer> toOperationCountMap(JsonNode operationsNode) {
+        Map<String, Integer> map = new LinkedHashMap<>();
+        if (!operationsNode.isArray()) {
+            return map;
+        }
+
+        for (JsonNode op : operationsNode) {
+            String method = op.path("method").asText("UNKNOWN");
+            String uri = op.path("uri").asText("UNKNOWN");
+            int count = (int) Math.round(op.path("count").asDouble(0));
+            String key = method + " " + uri;
+            map.merge(key, count, Integer::sum);
+        }
+
+        return map;
     }
 
     private static void writeCsv(Path path, JsonNode delta, boolean includeHeader) throws IOException {
@@ -408,9 +775,13 @@ class actuator_delta {
         System.out.println("  --scenario <name>      Scenario id (for example S1)");
         System.out.println("  --mode <name>          Mode label (for example conventional or hypermedia)");
         System.out.println("  --base-url <url>       Service base URL");
+        System.out.println("  --actuator-base-path   Optional Actuator base path override (for example /actuator)");
         System.out.println("  --results-dir <path>   Optional output path (default: test-plans/manual-results)");
     }
 
     private record Snapshot(Instant capturedAt, ObjectNode payload) {
+    }
+
+    private record EndpointPair(URI metricsUri, URI metricsCollectionUri, URI httpExchangesUri) {
     }
 }

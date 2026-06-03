@@ -1,0 +1,85 @@
+{
+  "capturedAt" : "2026-06-03T09:59:23.349423500Z",
+  "scenario" : "S3",
+  "mode" : "hypermedia",
+  "baseUrl" : "http://localhost:8081",
+  "metricsUri" : "http://localhost:8081/actuator/metrics/http.server.requests",
+  "httpexchangesUri" : "http://localhost:8081/actuator/httpexchanges",
+  "metrics" : {
+    "name" : "http.server.requests",
+    "baseUnit" : "seconds",
+    "measurements" : [ {
+      "statistic" : "COUNT",
+      "value" : 15.0
+    }, {
+      "statistic" : "TOTAL_TIME",
+      "value" : 0.7804783000000001
+    }, {
+      "statistic" : "MAX",
+      "value" : 0.2159915
+    } ],
+    "availableTags" : [ {
+      "tag" : "exception",
+      "values" : [ "none" ]
+    }, {
+      "tag" : "method",
+      "values" : [ "POST", "GET" ]
+    }, {
+      "tag" : "error",
+      "values" : [ "none" ]
+    }, {
+      "tag" : "uri",
+      "values" : [ "/orders", "/actuator/metrics/{requiredMetricName}", "/orders/{id}", "/actuator", "/orders/{id}/ship", "/**", "/" ]
+    }, {
+      "tag" : "outcome",
+      "values" : [ "CLIENT_ERROR", "SUCCESS" ]
+    }, {
+      "tag" : "status",
+      "values" : [ "404", "200", "201", "409" ]
+    } ]
+  },
+  "metricsBreakdown" : {
+    "statusCounts" : {
+      "404" : 4.0,
+      "200" : 11.0,
+      "201" : 2.0,
+      "409" : 1.0
+    },
+    "operationCounts" : [ {
+      "method" : "POST",
+      "uri" : "/orders",
+      "count" : 2.0
+    }, {
+      "method" : "POST",
+      "uri" : "/orders/{id}/ship",
+      "count" : 1.0
+    }, {
+      "method" : "GET",
+      "uri" : "/orders",
+      "count" : 1.0
+    }, {
+      "method" : "GET",
+      "uri" : "/actuator/metrics/{requiredMetricName}",
+      "count" : 16.0
+    }, {
+      "method" : "GET",
+      "uri" : "/orders/{id}",
+      "count" : 2.0
+    }, {
+      "method" : "GET",
+      "uri" : "/actuator",
+      "count" : 2.0
+    }, {
+      "method" : "GET",
+      "uri" : "/**",
+      "count" : 4.0
+    }, {
+      "method" : "GET",
+      "uri" : "/",
+      "count" : 1.0
+    } ]
+  },
+  "httpexchanges" : {
+    "exchanges" : [ ]
+  }
+}

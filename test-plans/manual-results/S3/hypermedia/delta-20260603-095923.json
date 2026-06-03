@@ -1,0 +1,56 @@
+{
+  "beforeCapturedAt" : "2026-06-03T09:57:45.435877400Z",
+  "afterCapturedAt" : "2026-06-03T09:59:23.349423500Z",
+  "distributionSource" : "metrics-tags",
+  "totals" : {
+    "metricCountBefore" : 1.0,
+    "metricCountAfter" : 15.0,
+    "metricCountDelta" : 14.0,
+    "newExchangeCount" : 0,
+    "invalid4xxCount" : 5
+  },
+  "statusDistribution" : {
+    "2xx" : 11,
+    "3xx" : 0,
+    "4xx" : 5,
+    "5xx" : 0
+  },
+  "operationDistribution" : [ {
+    "method" : "POST",
+    "uri" : "/orders",
+    "count" : 2
+  }, {
+    "method" : "POST",
+    "uri" : "/orders/{id}/ship",
+    "count" : 1
+  }, {
+    "method" : "GET",
+    "uri" : "/orders",
+    "count" : 1
+  }, {
+    "method" : "GET",
+    "uri" : "/actuator/metrics/{requiredMetricName}",
+    "count" : 16
+  }, {
+    "method" : "GET",
+    "uri" : "/orders/{id}",
+    "count" : 2
+  }, {
+    "method" : "GET",
+    "uri" : "/actuator",
+    "count" : 1
+  }, {
+    "method" : "GET",
+    "uri" : "/**",
+    "count" : 4
+  }, {
+    "method" : "GET",
+    "uri" : "/",
+    "count" : 1
+  } ],
+  "scenario" : "S3",
+  "mode" : "hypermedia",
+  "baseUrl" : "http://localhost:8081",
+  "beforeFile" : "test-plans/manual-results/S3/hypermedia/before-20260603-095745.json",
+  "afterFile" : "test-plans/manual-results/S3/hypermedia/after-20260603-095923.json"
+}

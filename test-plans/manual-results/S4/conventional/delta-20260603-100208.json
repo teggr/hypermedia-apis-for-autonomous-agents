@@ -1,0 +1,44 @@
+{
+  "beforeCapturedAt" : "2026-06-03T10:00:43.149151200Z",
+  "afterCapturedAt" : "2026-06-03T10:02:08.321571400Z",
+  "distributionSource" : "metrics-tags",
+  "totals" : {
+    "metricCountBefore" : 1.0,
+    "metricCountAfter" : 15.0,
+    "metricCountDelta" : 14.0,
+    "newExchangeCount" : 0,
+    "invalid4xxCount" : 8
+  },
+  "statusDistribution" : {
+    "2xx" : 9,
+    "3xx" : 0,
+    "4xx" : 8,
+    "5xx" : 0
+  },
+  "operationDistribution" : [ {
+    "method" : "GET",
+    "uri" : "/orders",
+    "count" : 3
+  }, {
+    "method" : "GET",
+    "uri" : "/actuator/metrics/{requiredMetricName}",
+    "count" : 8
+  }, {
+    "method" : "GET",
+    "uri" : "/orders/{id}",
+    "count" : 1
+  }, {
+    "method" : "GET",
+    "uri" : "/actuator",
+    "count" : 1
+  }, {
+    "method" : "GET",
+    "uri" : "/**",
+    "count" : 7
+  } ],
+  "scenario" : "S4",
+  "mode" : "conventional",
+  "baseUrl" : "http://localhost:8080",
+  "beforeFile" : "test-plans/manual-results/S4/conventional/before-20260603-100043.json",
+  "afterFile" : "test-plans/manual-results/S4/conventional/after-20260603-100208.json"
+}

@@ -1,0 +1,99 @@
+{
+  "capturedAt" : "2026-06-03T09:57:36.573893100Z",
+  "scenario" : "S3",
+  "mode" : "conventional",
+  "baseUrl" : "http://localhost:8080",
+  "metricsUri" : "http://localhost:8080/actuator/metrics/http.server.requests",
+  "httpexchangesUri" : "http://localhost:8080/actuator/httpexchanges",
+  "metrics" : {
+    "name" : "http.server.requests",
+    "baseUnit" : "seconds",
+    "measurements" : [ {
+      "statistic" : "COUNT",
+      "value" : 51.0
+    }, {
+      "statistic" : "TOTAL_TIME",
+      "value" : 1.0288488
+    }, {
+      "statistic" : "MAX",
+      "value" : 0.3687717
+    } ],
+    "availableTags" : [ {
+      "tag" : "exception",
+      "values" : [ "none" ]
+    }, {
+      "tag" : "method",
+      "values" : [ "OPTIONS", "POST", "GET" ]
+    }, {
+      "tag" : "error",
+      "values" : [ "none" ]
+    }, {
+      "tag" : "uri",
+      "values" : [ "/orders", "/actuator/metrics/{requiredMetricName}", "/orders/{id}", "/actuator", "/swagger-ui.html", "/swagger-ui*/**", "UNKNOWN", "/orders/{id}/ship", "/**", "/api-docs" ]
+    }, {
+      "tag" : "outcome",
+      "values" : [ "CLIENT_ERROR", "REDIRECTION", "SUCCESS" ]
+    }, {
+      "tag" : "status",
+      "values" : [ "404", "200", "201", "400", "302", "409" ]
+    } ]
+  },
+  "metricsBreakdown" : {
+    "statusCounts" : {
+      "404" : 16.0,
+      "200" : 19.0,
+      "201" : 1.0,
+      "400" : 16.0,
+      "302" : 1.0,
+      "409" : 1.0
+    },
+    "operationCounts" : [ {
+      "method" : "OPTIONS",
+      "uri" : "UNKNOWN",
+      "count" : 1.0
+    }, {
+      "method" : "POST",
+      "uri" : "/orders",
+      "count" : 14.0
+    }, {
+      "method" : "POST",
+      "uri" : "/orders/{id}/ship",
+      "count" : 1.0
+    }, {
+      "method" : "GET",
+      "uri" : "/orders",
+      "count" : 3.0
+    }, {
+      "method" : "GET",
+      "uri" : "/actuator/metrics/{requiredMetricName}",
+      "count" : 31.0
+    }, {
+      "method" : "GET",
+      "uri" : "/orders/{id}",
+      "count" : 4.0
+    }, {
+      "method" : "GET",
+      "uri" : "/actuator",
+      "count" : 4.0
+    }, {
+      "method" : "GET",
+      "uri" : "/swagger-ui.html",
+      "count" : 1.0
+    }, {
+      "method" : "GET",
+      "uri" : "/swagger-ui*/**",
+      "count" : 3.0
+    }, {
+      "method" : "GET",
+      "uri" : "/**",
+      "count" : 15.0
+    }, {
+      "method" : "GET",
+      "uri" : "/api-docs",
+      "count" : 3.0
+    } ]
+  },
+  "httpexchanges" : {
+    "exchanges" : [ ]
+  }
+}

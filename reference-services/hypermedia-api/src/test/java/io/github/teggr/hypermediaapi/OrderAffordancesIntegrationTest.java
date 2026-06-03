@@ -10,6 +10,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -20,8 +21,60 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class OrderAffordancesIntegrationTest {
 
+    private static final String BROWSER_ACCEPT = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7";
+
     @Autowired
     private TestRestTemplate rest;
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void root_shouldExposeOrderNavigationAndCreateTemplate_inHalForms() {
+        ResponseEntity<Map> response = getRoot();
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getHeaders().getContentType()).isNotNull();
+        assertThat(response.getHeaders().getContentType().toString())
+                .contains(MediaTypes.HAL_FORMS_JSON_VALUE);
+
+        Map<String, Object> links = (Map<String, Object>) response.getBody().get("_links");
+        assertThat(links).containsKey("self");
+        assertThat(links).containsKey("orders");
+        assertThat(links).containsKey("order");
+        Map<String, Object> orderLink = (Map<String, Object>) links.get("order");
+        assertThat((String) orderLink.get("href")).endsWith("/orders/{id}");
+        assertThat((String) orderLink.get("href")).doesNotContain("%7Bid%7D");
+        assertThat(orderLink).containsEntry("templated", true);
+
+        Map<String, Object> templates = (Map<String, Object>) response.getBody().get("_templates");
+        assertThat(templates).isNotNull();
+        assertThat(templates).containsKey("default");
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void root_browserAcceptWildcard_shouldStillReturnHalFormsTemplates() {
+        ResponseEntity<Map> response = getRootWithAccept(BROWSER_ACCEPT);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getHeaders().getContentType()).isNotNull();
+        assertThat(response.getHeaders().getContentType().toString())
+                .contains(MediaTypes.HAL_FORMS_JSON_VALUE);
+
+        Map<String, Object> templates = (Map<String, Object>) response.getBody().get("_templates");
+        assertThat(templates).isNotNull();
+        assertThat(templates).containsKey("default");
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void listOrders_shouldExposeCreateTemplate_inHalForms() {
+        ResponseEntity<Map> response = getOrders();
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Map<String, Object> templates = (Map<String, Object>) response.getBody().get("_templates");
+        assertThat(templates).isNotNull();
+        assertThat(templates).containsKey("default");
+    }
 
     @Test
     @SuppressWarnings("unchecked")
@@ -38,6 +91,13 @@ class OrderAffordancesIntegrationTest {
         // PENDING order must NOT expose ship or deliver
         assertThat(links).doesNotContainKey("ship");
         assertThat(links).doesNotContainKey("deliver");
+
+        Map<String, Object> templates = (Map<String, Object>) response.getBody().get("_templates");
+        assertThat(templates).isNotNull();
+        assertThat(templates).containsKey("confirmOrder");
+        assertThat(templates).containsKey("cancelOrder");
+        assertThat(templates).doesNotContainKey("shipOrder");
+        assertThat(templates).doesNotContainKey("deliverOrder");
     }
 
     @Test
@@ -84,8 +144,26 @@ class OrderAffordancesIntegrationTest {
 
     private ResponseEntity<Map> getOrder(Long id) {
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Accept", MediaTypes.HAL_JSON_VALUE);
-        return rest.getForEntity("/orders/" + id, Map.class);
+        headers.set("Accept", MediaTypes.HAL_FORMS_JSON_VALUE);
+        return rest.exchange("/orders/" + id, HttpMethod.GET, new HttpEntity<>(headers), Map.class);
+    }
+
+    private ResponseEntity<Map> getRoot() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Accept", MediaTypes.HAL_FORMS_JSON_VALUE);
+        return rest.exchange("/", HttpMethod.GET, new HttpEntity<>(headers), Map.class);
+    }
+
+    private ResponseEntity<Map> getRootWithAccept(String accept) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Accept", accept);
+        return rest.exchange("/", HttpMethod.GET, new HttpEntity<>(headers), Map.class);
+    }
+
+    private ResponseEntity<Map> getOrders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Accept", MediaTypes.HAL_FORMS_JSON_VALUE);
+        return rest.exchange("/orders", HttpMethod.GET, new HttpEntity<>(headers), Map.class);
     }
 
     private void postTransition(Long id, String rel) {

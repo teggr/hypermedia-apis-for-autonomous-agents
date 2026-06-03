@@ -1,0 +1,68 @@
+{
+  "beforeCapturedAt" : "2026-06-03T09:54:10.406401200Z",
+  "afterCapturedAt" : "2026-06-03T09:57:36.573893100Z",
+  "distributionSource" : "metrics-tags",
+  "totals" : {
+    "metricCountBefore" : 1.0,
+    "metricCountAfter" : 51.0,
+    "metricCountDelta" : 50.0,
+    "newExchangeCount" : 0,
+    "invalid4xxCount" : 33
+  },
+  "statusDistribution" : {
+    "2xx" : 18,
+    "3xx" : 1,
+    "4xx" : 33,
+    "5xx" : 0
+  },
+  "operationDistribution" : [ {
+    "method" : "OPTIONS",
+    "uri" : "UNKNOWN",
+    "count" : 1
+  }, {
+    "method" : "POST",
+    "uri" : "/orders",
+    "count" : 14
+  }, {
+    "method" : "POST",
+    "uri" : "/orders/{id}/ship",
+    "count" : 1
+  }, {
+    "method" : "GET",
+    "uri" : "/orders",
+    "count" : 3
+  }, {
+    "method" : "GET",
+    "uri" : "/actuator/metrics/{requiredMetricName}",
+    "count" : 31
+  }, {
+    "method" : "GET",
+    "uri" : "/orders/{id}",
+    "count" : 4
+  }, {
+    "method" : "GET",
+    "uri" : "/actuator",
+    "count" : 3
+  }, {
+    "method" : "GET",
+    "uri" : "/swagger-ui.html",
+    "count" : 1
+  }, {
+    "method" : "GET",
+    "uri" : "/swagger-ui*/**",
+    "count" : 3
+  }, {
+    "method" : "GET",
+    "uri" : "/**",
+    "count" : 15
+  }, {
+    "method" : "GET",
+    "uri" : "/api-docs",
+    "count" : 3
+  } ],
+  "scenario" : "S3",
+  "mode" : "conventional",
+  "baseUrl" : "http://localhost:8080",
+  "beforeFile" : "test-plans/manual-results/S3/conventional/before-20260603-095410.json",
+  "afterFile" : "test-plans/manual-results/S3/conventional/after-20260603-095736.json"
+}

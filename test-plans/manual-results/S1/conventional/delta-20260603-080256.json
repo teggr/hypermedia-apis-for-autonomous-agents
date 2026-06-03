@@ -1,0 +1,23 @@
+{
+  "beforeCapturedAt" : "2026-06-03T07:54:59.886365100Z",
+  "afterCapturedAt" : "2026-06-03T08:02:56.499290Z",
+  "totals" : {
+    "metricCountBefore" : 7.0,
+    "metricCountAfter" : 33.0,
+    "metricCountDelta" : 26.0,
+    "newExchangeCount" : 0,
+    "invalid4xxCount" : 0
+  },
+  "statusDistribution" : {
+    "2xx" : 0,
+    "3xx" : 0,
+    "4xx" : 0,
+    "5xx" : 0
+  },
+  "operationDistribution" : [ ],
+  "scenario" : "S1",
+  "mode" : "conventional",
+  "baseUrl" : "http://localhost:8080",
+  "beforeFile" : "test-plans/manual-results/S1/conventional/before-20260603-075459.json",
+  "afterFile" : "test-plans/manual-results/S1/conventional/after-20260603-080256.json"
+}

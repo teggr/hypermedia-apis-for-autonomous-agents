@@ -1,0 +1,76 @@
+{
+  "capturedAt" : "2026-06-03T10:03:23.813559300Z",
+  "scenario" : "S4",
+  "mode" : "hypermedia",
+  "baseUrl" : "http://localhost:8081",
+  "metricsUri" : "http://localhost:8081/actuator/metrics/http.server.requests",
+  "httpexchangesUri" : "http://localhost:8081/actuator/httpexchanges",
+  "metrics" : {
+    "name" : "http.server.requests",
+    "baseUnit" : "seconds",
+    "measurements" : [ {
+      "statistic" : "COUNT",
+      "value" : 15.0
+    }, {
+      "statistic" : "TOTAL_TIME",
+      "value" : 0.6806390999999999
+    }, {
+      "statistic" : "MAX",
+      "value" : 0.4268247
+    } ],
+    "availableTags" : [ {
+      "tag" : "exception",
+      "values" : [ "none" ]
+    }, {
+      "tag" : "method",
+      "values" : [ "GET" ]
+    }, {
+      "tag" : "error",
+      "values" : [ "none" ]
+    }, {
+      "tag" : "uri",
+      "values" : [ "/orders", "/actuator/metrics/{requiredMetricName}", "/orders/{id}", "/actuator", "/**", "/" ]
+    }, {
+      "tag" : "outcome",
+      "values" : [ "CLIENT_ERROR", "SUCCESS" ]
+    }, {
+      "tag" : "status",
+      "values" : [ "404", "400", "200" ]
+    } ]
+  },
+  "metricsBreakdown" : {
+    "statusCounts" : {
+      "404" : 6.0,
+      "400" : 1.0,
+      "200" : 12.0
+    },
+    "operationCounts" : [ {
+      "method" : "GET",
+      "uri" : "/orders",
+      "count" : 3.0
+    }, {
+      "method" : "GET",
+      "uri" : "/actuator/metrics/{requiredMetricName}",
+      "count" : 8.0
+    }, {
+      "method" : "GET",
+      "uri" : "/orders/{id}",
+      "count" : 1.0
+    }, {
+      "method" : "GET",
+      "uri" : "/actuator",
+      "count" : 2.0
+    }, {
+      "method" : "GET",
+      "uri" : "/**",
+      "count" : 6.0
+    }, {
+      "method" : "GET",
+      "uri" : "/",
+      "count" : 1.0
+    } ]
+  },
+  "httpexchanges" : {
+    "exchanges" : [ ]
+  }
+}

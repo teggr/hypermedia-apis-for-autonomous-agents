@@ -1,0 +1,89 @@
+{
+  "capturedAt" : "2026-06-03T09:41:50.172485700Z",
+  "scenario" : "S2",
+  "mode" : "conventional",
+  "baseUrl" : "http://localhost:8080",
+  "metricsUri" : "http://localhost:8080/actuator/metrics/http.server.requests",
+  "httpexchangesUri" : "http://localhost:8080/actuator/httpexchanges",
+  "metrics" : {
+    "name" : "http.server.requests",
+    "baseUnit" : "seconds",
+    "measurements" : [ {
+      "statistic" : "COUNT",
+      "value" : 144.0
+    }, {
+      "statistic" : "TOTAL_TIME",
+      "value" : 0.9194260000000001
+    }, {
+      "statistic" : "MAX",
+      "value" : 0.0464258
+    } ],
+    "availableTags" : [ {
+      "tag" : "exception",
+      "values" : [ "none" ]
+    }, {
+      "tag" : "method",
+      "values" : [ "OPTIONS", "POST", "GET" ]
+    }, {
+      "tag" : "error",
+      "values" : [ "none" ]
+    }, {
+      "tag" : "uri",
+      "values" : [ "/orders", "/actuator/metrics/{requiredMetricName}", "/actuator", "/swagger-ui*/**", "/actuator/health", "UNKNOWN", "/**" ]
+    }, {
+      "tag" : "outcome",
+      "values" : [ "CLIENT_ERROR", "SUCCESS" ]
+    }, {
+      "tag" : "status",
+      "values" : [ "404", "415", "200", "400" ]
+    } ]
+  },
+  "metricsBreakdown" : {
+    "statusCounts" : {
+      "404" : 25.0,
+      "415" : 39.0,
+      "200" : 33.0,
+      "400" : 51.0
+    },
+    "operationCounts" : [ {
+      "method" : "OPTIONS",
+      "uri" : "UNKNOWN",
+      "count" : 14.0
+    }, {
+      "method" : "OPTIONS",
+      "uri" : "/**",
+      "count" : 10.0
+    }, {
+      "method" : "POST",
+      "uri" : "/orders",
+      "count" : 90.0
+    }, {
+      "method" : "GET",
+      "uri" : "/orders",
+      "count" : 7.0
+    }, {
+      "method" : "GET",
+      "uri" : "/actuator/metrics/{requiredMetricName}",
+      "count" : 24.0
+    }, {
+      "method" : "GET",
+      "uri" : "/actuator",
+      "count" : 4.0
+    }, {
+      "method" : "GET",
+      "uri" : "/swagger-ui*/**",
+      "count" : 1.0
+    }, {
+      "method" : "GET",
+      "uri" : "/actuator/health",
+      "count" : 1.0
+    }, {
+      "method" : "GET",
+      "uri" : "/**",
+      "count" : 14.0
+    } ]
+  },
+  "httpexchanges" : {
+    "exchanges" : [ ]
+  }
+}

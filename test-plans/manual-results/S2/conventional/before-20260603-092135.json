@@ -1,0 +1,54 @@
+{
+  "capturedAt" : "2026-06-03T09:21:35.835413100Z",
+  "scenario" : "S2",
+  "mode" : "conventional",
+  "baseUrl" : "http://localhost:8080",
+  "metricsUri" : "http://localhost:8080/actuator/metrics/http.server.requests",
+  "httpexchangesUri" : "http://localhost:8080/actuator/httpexchanges",
+  "metrics" : {
+    "name" : "http.server.requests",
+    "baseUnit" : "seconds",
+    "measurements" : [ {
+      "statistic" : "COUNT",
+      "value" : 1.0
+    }, {
+      "statistic" : "TOTAL_TIME",
+      "value" : 0.1183017
+    }, {
+      "statistic" : "MAX",
+      "value" : 0.1183017
+    } ],
+    "availableTags" : [ {
+      "tag" : "exception",
+      "values" : [ "none" ]
+    }, {
+      "tag" : "method",
+      "values" : [ "GET" ]
+    }, {
+      "tag" : "error",
+      "values" : [ "none" ]
+    }, {
+      "tag" : "uri",
+      "values" : [ "/actuator" ]
+    }, {
+      "tag" : "outcome",
+      "values" : [ "SUCCESS" ]
+    }, {
+      "tag" : "status",
+      "values" : [ "200" ]
+    } ]
+  },
+  "metricsBreakdown" : {
+    "statusCounts" : {
+      "200" : 2.0
+    },
+    "operationCounts" : [ {
+      "method" : "GET",
+      "uri" : "/actuator",
+      "count" : 1.0
+    } ]
+  },
+  "httpexchanges" : {
+    "exchanges" : [ ]
+  }
+}

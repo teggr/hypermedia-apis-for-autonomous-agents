@@ -1,0 +1,48 @@
+{
+  "beforeCapturedAt" : "2026-06-03T10:02:24.633177600Z",
+  "afterCapturedAt" : "2026-06-03T10:03:23.813559300Z",
+  "distributionSource" : "metrics-tags",
+  "totals" : {
+    "metricCountBefore" : 1.0,
+    "metricCountAfter" : 15.0,
+    "metricCountDelta" : 14.0,
+    "newExchangeCount" : 0,
+    "invalid4xxCount" : 7
+  },
+  "statusDistribution" : {
+    "2xx" : 10,
+    "3xx" : 0,
+    "4xx" : 7,
+    "5xx" : 0
+  },
+  "operationDistribution" : [ {
+    "method" : "GET",
+    "uri" : "/orders",
+    "count" : 3
+  }, {
+    "method" : "GET",
+    "uri" : "/actuator/metrics/{requiredMetricName}",
+    "count" : 8
+  }, {
+    "method" : "GET",
+    "uri" : "/orders/{id}",
+    "count" : 1
+  }, {
+    "method" : "GET",
+    "uri" : "/actuator",
+    "count" : 1
+  }, {
+    "method" : "GET",
+    "uri" : "/**",
+    "count" : 6
+  }, {
+    "method" : "GET",
+    "uri" : "/",
+    "count" : 1
+  } ],
+  "scenario" : "S4",
+  "mode" : "hypermedia",
+  "baseUrl" : "http://localhost:8081",
+  "beforeFile" : "test-plans/manual-results/S4/hypermedia/before-20260603-100224.json",
+  "afterFile" : "test-plans/manual-results/S4/hypermedia/after-20260603-100323.json"
+}

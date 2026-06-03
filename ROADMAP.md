@@ -172,6 +172,7 @@ This roadmap defines all tasks required to answer the hypotheses from the conver
 - [x] Removed legacy `agents/` module and cleaned root Maven reactor.
 - [x] Updated core docs (`README.md`, `test-plans/order-management.md`, `.github/copilot-instructions.md`) to Copilot-driven execution.
 - [x] Added `scripts/actuator-delta.java` (JBang) to capture before/after actuator snapshots and write per-scenario JSON/CSV deltas to `test-plans/manual-results/`.
+- [x] Re-implemented `reference-services/hypermedia-api` to emit HAL-FORMS responses with Spring HATEOAS affordances, including a discoverable root resource that links/templates `listOrders`, `createOrder`, and templated `order` lookup.
 - [ ] Next: add deterministic data reset/seed operations between scenarios.
 - [ ] Next: add scriptable Copilot CLI scenario execution and evidence export for S1 and S2.
 

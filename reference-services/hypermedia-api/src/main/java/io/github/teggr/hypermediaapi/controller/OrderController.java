@@ -8,6 +8,7 @@ import io.github.teggr.hypermediaapi.service.OrderService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +41,7 @@ public class OrderController {
         this.assembler = assembler;
     }
 
-    @GetMapping(produces = MediaTypes.HAL_JSON_VALUE)
+    @GetMapping(produces = {MediaTypes.HAL_FORMS_JSON_VALUE, MediaTypes.HAL_JSON_VALUE})
     public CollectionModel<OrderModel> listOrders(
             @RequestParam(required = false) String customerId,
             @RequestParam(required = false) OrderStatus status) {
@@ -55,11 +56,17 @@ public class OrderController {
         }
 
         CollectionModel<OrderModel> collection = assembler.toCollectionModel(orders);
-        collection.add(linkTo(methodOn(OrderController.class).listOrders(null, null)).withSelfRel());
+
+        Link self = linkTo(methodOn(OrderController.class).listOrders(null, null))
+                .withSelfRel()
+                .andAffordance(afford(methodOn(OrderController.class).createOrder(null)));
+
+        collection.add(self);
+        collection.add(templatedOrderLookupLink());
         return collection;
     }
 
-    @PostMapping(produces = MediaTypes.HAL_JSON_VALUE)
+    @PostMapping(produces = {MediaTypes.HAL_FORMS_JSON_VALUE, MediaTypes.HAL_JSON_VALUE})
     public ResponseEntity<OrderModel> createOrder(@Valid @RequestBody CreateOrderRequest request) {
         Order created = service.create(request.customerId(), request.description());
         OrderModel model = assembler.toModel(created);
@@ -68,27 +75,27 @@ public class OrderController {
                 .body(model);
     }
 
-    @GetMapping(value = "/{id}", produces = MediaTypes.HAL_JSON_VALUE)
+    @GetMapping(value = "/{id}", produces = {MediaTypes.HAL_FORMS_JSON_VALUE, MediaTypes.HAL_JSON_VALUE})
     public OrderModel getOrder(@PathVariable Long id) {
         return assembler.toModel(service.findById(id));
     }
 
-    @PostMapping(value = "/{id}/confirm", produces = MediaTypes.HAL_JSON_VALUE)
+    @PostMapping(value = "/{id}/confirm", produces = {MediaTypes.HAL_FORMS_JSON_VALUE, MediaTypes.HAL_JSON_VALUE})
     public OrderModel confirmOrder(@PathVariable Long id) {
         return assembler.toModel(service.transition(id, OrderStatus.CONFIRMED));
     }
 
-    @PostMapping(value = "/{id}/ship", produces = MediaTypes.HAL_JSON_VALUE)
+    @PostMapping(value = "/{id}/ship", produces = {MediaTypes.HAL_FORMS_JSON_VALUE, MediaTypes.HAL_JSON_VALUE})
     public OrderModel shipOrder(@PathVariable Long id) {
         return assembler.toModel(service.transition(id, OrderStatus.SHIPPED));
     }
 
-    @PostMapping(value = "/{id}/deliver", produces = MediaTypes.HAL_JSON_VALUE)
+    @PostMapping(value = "/{id}/deliver", produces = {MediaTypes.HAL_FORMS_JSON_VALUE, MediaTypes.HAL_JSON_VALUE})
     public OrderModel deliverOrder(@PathVariable Long id) {
         return assembler.toModel(service.transition(id, OrderStatus.DELIVERED));
     }
 
-    @PostMapping(value = "/{id}/cancel", produces = MediaTypes.HAL_JSON_VALUE)
+    @PostMapping(value = "/{id}/cancel", produces = {MediaTypes.HAL_FORMS_JSON_VALUE, MediaTypes.HAL_JSON_VALUE})
     public OrderModel cancelOrder(@PathVariable Long id) {
         return assembler.toModel(service.transition(id, OrderStatus.CANCELLED));
     }
@@ -108,4 +115,9 @@ public class OrderController {
             @NotBlank String customerId,
             @NotBlank String description
     ) {}
+
+    private Link templatedOrderLookupLink() {
+        String href = linkTo(OrderController.class).toUri().toString() + "/{id}";
+        return Link.of(href).withRel("order");
+    }
 }

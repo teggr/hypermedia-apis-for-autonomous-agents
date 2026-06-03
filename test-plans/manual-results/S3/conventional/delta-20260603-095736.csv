@@ -1,0 +1,2 @@
+after_captured_at,scenario,mode,base_url,metric_count_before,metric_count_after,metric_count_delta,new_exchange_count,invalid_4xx_count,status_2xx,status_3xx,status_4xx,status_5xx
+"2026-06-03T09:57:36.573893100Z","S3","conventional","http://localhost:8080",1.0,51.0,50.0,0,33,18,1,33,0
